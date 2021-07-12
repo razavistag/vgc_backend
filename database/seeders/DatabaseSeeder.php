@@ -75,7 +75,7 @@ class DatabaseSeeder extends Seeder
             ->create();
 
         // CREATE ORDER
-        \App\Models\Order::factory(1000)->state(new Sequence(
+        \App\Models\Order::factory(100000)->state(new Sequence(
             ['status' => '0'],  // Received
             ['status' => '1'],  // Working
             ['status' => '2'],  // Completed
@@ -88,22 +88,22 @@ class DatabaseSeeder extends Seeder
         ))->create();
 
         // CREATE AGENT
-        \App\Models\Agent::factory(50)->create();
+        \App\Models\Agent::factory(5000)->create();
 
         // CREATE VENDORS
-        \App\Models\Vendor::factory(50)->create();
+        \App\Models\Vendor::factory(5000)->create();
 
         // CREATE CUSTOMERS
-        \App\Models\Customer::factory(50)->create();
+        \App\Models\Customer::factory(50000)->create();
 
         // CREATE PO
-        \App\Models\Po::factory(1000)->create();
+        \App\Models\Po::factory(100000)->create();
 
         // CREATE LOCATIONS
-        \App\Models\Location::factory(10)->create();
+        \App\Models\Location::factory(500)->create();
 
         // CREATE RECEIVING LOG ENTERY
-        \App\Models\Receivinglogentery::factory(100)->create();
+        \App\Models\Receivinglogentery::factory(100000)->create();
     }
 }
 

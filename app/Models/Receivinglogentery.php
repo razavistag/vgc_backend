@@ -34,7 +34,7 @@ class Receivinglogentery extends Model
 
     public function Attachment()
     {
-        return $this->hasMany(Attachment::class, 'document_auto_id');
+        return $this->hasMany(Attachment::class, 'document_auto_id', 'id');
     }
     public function Vendor()
     {

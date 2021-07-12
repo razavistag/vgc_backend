@@ -39,8 +39,15 @@ class ReceivinglogenteryController extends Controller
     public function create(Request $request)
     {
 
-        $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
         $FormObj = $this->GetForm($request);
+
+        $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
+
+        if ($LastID) {
+            $LastID = $LastID->id;
+        } else {
+            $LastID = 1;
+        }
 
         if (isset($FormObj['attachment'])) {
             // return 1;
@@ -222,6 +229,39 @@ class ReceivinglogenteryController extends Controller
             'success' => true,
             'object' => $objectFind
         ], 200);
+    }
+
+    public function getAttachments($id)
+    {
+        $objFetch = Attachment::where('document_auto_id', $id)->get();
+        return response()->json([
+            'success' => true,
+            'objects' => $objFetch
+        ], 200);
+    }
+
+    public function destroyAttachment($order)
+    {
+
+        DB::beginTransaction();
+        try {
+            $obj = Attachment::find($order);
+            $obj->delete();
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Attachment Successfully Deleted'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function rePhaseToDate($object)

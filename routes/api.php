@@ -85,6 +85,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('receivinglogentries/attachment/', [ReceivinglogenteryController::class, 'create']);
     Route::get('receivinglogentries/edit/{find}', [ReceivinglogenteryController::class, 'edit']);
     Route::put('receivinglogentries/{id}', [ReceivinglogenteryController::class, 'update']);
+    Route::get('receivinglogentries/getAttachments/{find}', [ReceivinglogenteryController::class, 'getAttachments']);
+    Route::delete('receivinglogentries/attachment/{id}', [ReceivinglogenteryController::class, 'destroyAttachment']);
+
 
 
 
