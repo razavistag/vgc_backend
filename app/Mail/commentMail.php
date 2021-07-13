@@ -35,7 +35,7 @@ class commentMail extends Mailable
 
         return  [
             $this->subject($this->details['object']['document_id'] . '# COMMENT RECEVIED'),
-            $this->from('vms.vistag@gmail.com', 'Vista Global Consult'),
+            $this->from('vimmixticket@gmail.com', 'Vista Global Consult'),
             $this->to($this->details['emailTo']),
             $this->markdown('emails.commentMail', [
                 'sendBy' =>  Auth::user()->name,

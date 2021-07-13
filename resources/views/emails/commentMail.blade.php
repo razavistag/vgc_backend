@@ -5,7 +5,9 @@
 {{$message}}
 @endcomponent
 
-
+@component('mail::footer', ['company' => 'vista'])
+{{$company}}
+@endcomponent
 
 
 Thank You,<br>

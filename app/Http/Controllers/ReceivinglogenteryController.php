@@ -136,9 +136,15 @@ class ReceivinglogenteryController extends Controller
      */
     public function edit($receivinglogentery)
     {
+        $document_type = 'receivinglogentries';
         $objFetch = Receivinglogentery::with(
-            'Vendor:id,name,email,code',
-            'Attachment'
+            [
+                'Vendor:id,name,email,code',
+                'Attachment' => function ($q) use ($document_type) {
+                    $q->where('document_name', $document_type);
+                }
+
+            ]
         )->find($receivinglogentery);
 
 
@@ -233,7 +239,10 @@ class ReceivinglogenteryController extends Controller
 
     public function getAttachments($id)
     {
-        $objFetch = Attachment::where('document_auto_id', $id)->get();
+        $objFetch = Attachment::where([
+            ['document_auto_id', $id],
+            ['document_name', '=', 'receivinglogentries']
+        ])->get();
         return response()->json([
             'success' => true,
             'objects' => $objFetch

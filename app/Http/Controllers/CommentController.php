@@ -112,13 +112,16 @@ class CommentController extends Controller
         }
 
 
+        $getMessage = $this->show($request->data_id['id']);
 
-        // Mail::send(new commentMail($storeObj));
+        // return collect($getMessage->original['objects'])->toJson();
+        // return $getMessage->status;
 
 
         return response()->json([
             'req' => $request->all(),
-            'succcess' => true
+            'succcess' => true,
+            'objects' => collect($getMessage->original['objects'])
         ]);
     }
 
@@ -131,7 +134,10 @@ class CommentController extends Controller
     public function show($id)
     {
         // date("D Y-m-d h:i:s A", $time)
-        $objects = Comment::with('user:id,name,profilePic')->where('document_id', $id)->get();
+        $objects = Comment::with('user:id,name,profilePic')
+        ->where('document_id', $id)
+        ->orderBy('id','desc')
+        ->limit(6)->get();
         $objects->each(function ($item, $key) {
             if ($item->is_read == 0) return $item->is_read = 'Mark as read';
             if ($item->is_read == 1) return $item->is_read = 'Mark as unread';
@@ -141,9 +147,9 @@ class CommentController extends Controller
         });
 
         return response()->json([
-
             'succcess' => true,
-            'objects' => $objects
+            'objects' => $objects,
+            'status'=>200
         ]);
     }
 
@@ -229,46 +235,64 @@ class CommentController extends Controller
         $time = time();
         if ($status == 0) {
             $status  = 'Requested';
-        } if ($status == 1) {
+        }
+        if ($status == 1) {
             $status  = 'Working';
-        } if ($status == 2) {
+        }
+        if ($status == 2) {
             $status  = 'Completed';
-        } if ($status == 3) {
+        }
+        if ($status == 3) {
             $status  = 'Reopend';
-        } if ($status == 4) {
+        }
+        if ($status == 4) {
             $status  = 'Pending';
-        } if ($status == 5) {
+        }
+        if ($status == 5) {
             $status  = 'Approved ord';
-        } if ($status == 6) {
+        }
+        if ($status == 6) {
             $status  = 'Approved pro';
-        } if ($status == 7) {
+        }
+        if ($status == 7) {
             $status  = 'Approved';
-        } if ($status == 8) {
+        }
+        if ($status == 8) {
             $status  = 'Close';
-        } if ($status == 9) {
+        }
+        if ($status == 9) {
             $status  = 'Canceled';
         }
         $oldStatus = Comment::select('document_status')->take(1)->where('document_id', $document_id)->orderby('id', 'desc')->first();
         $setStatus = '';
         if ($oldStatus['document_status'] == 0) {
             $setStatus  = 'Requested';
-        } if ($oldStatus['document_status'] == 1) {
+        }
+        if ($oldStatus['document_status'] == 1) {
             $setStatus  = 'Working';
-        } if ($oldStatus['document_status'] == 2) {
+        }
+        if ($oldStatus['document_status'] == 2) {
             $setStatus  = 'Completed';
-        } if ($oldStatus['document_status'] == 3) {
+        }
+        if ($oldStatus['document_status'] == 3) {
             $setStatus  = 'Reopend';
-        } if ($oldStatus['document_status'] == 4) {
+        }
+        if ($oldStatus['document_status'] == 4) {
             $setStatus = 'Pending';
-        } if ($oldStatus['document_status'] == 5) {
+        }
+        if ($oldStatus['document_status'] == 5) {
             $setStatus  = 'Approved ord';
-        } if ($oldStatus['document_status'] == 6) {
+        }
+        if ($oldStatus['document_status'] == 6) {
             $setStatus  = 'Approved pro';
-        } if ($oldStatus['document_status'] == 7) {
+        }
+        if ($oldStatus['document_status'] == 7) {
             $setStatus  = 'Approved';
-        } if ($oldStatus['document_status'] == 8) {
+        }
+        if ($oldStatus['document_status'] == 8) {
             $setStatus  = 'Close';
-        } if ($oldStatus['document_status'] == 9) {
+        }
+        if ($oldStatus['document_status'] == 9) {
             $setStatus  = 'Canceled';
         }
 

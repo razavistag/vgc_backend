@@ -12,6 +12,7 @@ use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
@@ -237,6 +238,225 @@ class AuthController extends Controller
         ], 200);
     }
 
+    public function orderStatment()
+    {
+        // ORDER RECEVIED
+        $recevied = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 0)
+            ->groupBy('order_type')
+            ->get();
+
+        $receviedBulk = $receviedRelase = $receviedDistiribute = 0;
+        foreach ($recevied as $rec) {
+            if ($rec->order_type == 1) $receviedRelase = $rec->order_count;
+            elseif ($rec->order_type == 2) $receviedBulk = $rec->order_count;
+            elseif ($rec->order_type == 3) $receviedDistiribute = $rec->order_count;
+        }
+
+        // ORDER WORKING
+        $working = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 1)
+            ->groupBy('order_type')
+            ->get();
+
+        $workingBulk = $workingRelase = $workingDistiribute = 0;
+        foreach ($working as $rec) {
+            if ($rec->order_type == 1) $workingRelase = $rec->order_count;
+            elseif ($rec->order_type == 2) $workingBulk = $rec->order_count;
+            elseif ($rec->order_type == 3) $workingDistiribute = $rec->order_count;
+        }
+
+        // ORDER COMPLETED
+        $completed = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 2)
+            ->groupBy('order_type')
+            ->get();
+
+        $completedBulk = $completedRelase = $completedDistiribute = 0;
+        foreach ($completed as $rec) {
+            if ($rec->order_type == 1) $completedRelase = $rec->order_count;
+            elseif ($rec->order_type == 2) $completedBulk = $rec->order_count;
+            elseif ($rec->order_type == 3) $completedDistiribute = $rec->order_count;
+        }
+
+        // ORDER REOPENED
+        $reopened = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 4)
+            ->groupBy('order_type')
+            ->get();
+        $reopenedBulk = $reopenedRelase = $reopenedDistiribute = 0;
+        foreach ($reopened as $rec) {
+            if ($rec->order_type == 1) $reopenedRelase = $rec->order_count;
+            elseif ($rec->order_type == 2) $reopenedBulk = $rec->order_count;
+            elseif ($rec->order_type == 3) $reopenedDistiribute = $rec->order_count;
+        }
+
+        // ORDER PENDING
+        $pending = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 5)
+            ->groupBy('order_type')
+            ->get();
+        $pendingBulk = $pendingRelase = $pendingDistiribute = 0;
+        foreach ($pending as $rec) {
+            if ($rec->order_type == 1) $pendingRelase = $rec->order_count;
+            elseif ($rec->order_type == 2) $pendingBulk = $rec->order_count;
+            elseif ($rec->order_type == 3) $pendingDistiribute = $rec->order_count;
+        }
+
+        // ORDER NEEDREVISED
+        $needrevised = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 7)
+            ->groupBy('order_type')
+            ->get();
+        $needrevisedBulk = $needrevisedRelase = $needrevisedDistiribute = 0;
+        foreach ($needrevised as $rec) {
+            if ($rec->order_type == 1) $needrevisedRelase = $rec->order_count;
+            elseif ($rec->order_type == 2) $needrevisedBulk = $rec->order_count;
+            elseif ($rec->order_type == 3) $needrevisedDistiribute = $rec->order_count;
+        }
+
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statement Updated',
+            'orderStatment' =>  [
+                'recevied' => [
+                    'Bulk' => $receviedBulk,
+                    'Relase' => $receviedRelase,
+                    'Distiribute' => $receviedDistiribute
+                ],
+                'working' => [
+                    'Bulk' => $workingBulk,
+                    'Relase' => $workingRelase,
+                    'Distiribute' => $workingDistiribute
+                ],
+                'completed' => [
+                    'Bulk' => $completedBulk,
+                    'Relase' => $completedRelase,
+                    'Distiribute' => $completedDistiribute
+                ],
+                'reopened' => [
+                    'Bulk' => $reopenedBulk,
+                    'Relase' => $reopenedRelase,
+                    'Distiribute' => $reopenedDistiribute
+                ],
+                'pending' => [
+                    'Bulk' => $pendingBulk,
+                    'Relase' => $pendingRelase,
+                    'Distiribute' => $pendingDistiribute
+                ],
+                'needrevised' => [
+                    'Bulk' => $needrevisedBulk,
+                    'Relase' => $needrevisedRelase,
+                    'Distiribute' => $needrevisedDistiribute
+                ],
+            ],
+
+        ], 200);
+    }
+    public function poStatment()
+    {
+
+        // PO REQUESTED
+        $requested = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 0)
+            ->groupBy('priority')
+            ->get();
+
+        $requestedHigh = $requestedLow  = 0;
+        foreach ($requested as $rec) {
+            if ($rec->priority == 0) $requestedHigh = $rec->order_count;
+            elseif ($rec->priority == 1) $requestedLow = $rec->order_count;
+        }
+
+        // PO WORKING
+        $poWorking = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 1)
+            ->groupBy('priority')
+            ->get();
+
+        $poWorkingHigh = $poWorkingLow  = 0;
+        foreach ($poWorking as $rec) {
+            if ($rec->priority == 0) $poWorkingHigh = $rec->order_count;
+            elseif ($rec->priority == 1) $poWorkingLow = $rec->order_count;
+        }
+
+        // PO COMPLETED
+        $poCompleted = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 2)
+            ->groupBy('priority')
+            ->get();
+
+        $poCompletedHigh = $poCompletedLow  = 0;
+        foreach ($poCompleted as $rec) {
+            if ($rec->priority == 0) $poCompletedHigh = $rec->order_count;
+            elseif ($rec->priority == 1) $poCompletedLow = $rec->order_count;
+        }
+
+        // PO REOPENED
+        $poReopened = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 3)
+            ->groupBy('priority')
+            ->get();
+
+        $poReopeneddHigh = $poReopenedLow  = 0;
+        foreach ($poReopened as $rec) {
+            if ($rec->priority == 0) $poReopenedHigh = $rec->order_count;
+            elseif ($rec->priority == 1) $poReopenedLow = $rec->order_count;
+        }
+
+        // PO PENDING
+        $poPending = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 4)
+            ->groupBy('priority')
+            ->get();
+
+        $poPendingHigh = $poPendingLow  = 0;
+        foreach ($poPending as $rec) {
+            if ($rec->priority == 0) $poPendingHigh = $rec->order_count;
+            elseif (
+                $rec->priority == 1
+            ) $poPendingLow = $rec->order_count;
+        }
+
+        // PO APPROVED
+        $poApproved = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 7)
+            ->groupBy('priority')
+            ->get();
+
+        $poApprovedHigh = $poApprovedLow  = 0;
+        foreach ($poApproved as $rec) {
+            if ($rec->priority == 0) $poApprovedHigh = $rec->order_count;
+            elseif (
+                $rec->priority == 1
+            ) $poApprovedLow = $rec->order_count;
+        }
+
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Statement Updated',
+            'poStatment' => [
+                'requested' => [
+                    'high' => $requestedHigh,
+                    'low' => $requestedLow,
+                ],
+                'working' => [
+                    'high' =>  $poWorkingHigh,
+                    'low' => $poWorkingLow,
+                ],
+                'completed' => [
+                    'high' => $poCompletedHigh,
+                    'low' => $poCompletedLow,
+                ],
+                'reopened' => [
+                    'high' => $poReopeneddHigh,
+                    'low' => $poReopenedLow,
+                ],
+                'pending' => [
+                    'high' => $poPendingHigh,
+                    'low' => $poPendingLow,
+                ],
+                'approved' => [
+                    'high' => $poApprovedHigh,
+                    'low' => $poApprovedLow,
+
+                ],
+            ],
+
+        ], 200);
+    }
+
     public function mailList()
     {
         $objects = User::select('id', 'name', 'email')->where(function ($query) {
@@ -312,9 +532,63 @@ class AuthController extends Controller
 
 
     //
-    // UPDATE User Account
+    // PROFILE UPDATE
     //
 
+    public function profileUpdate(Request $request, $id)
+    {
+        $FormObj = $request->all();
+        $storeObj = User::where('id', $id)
+            ->update($FormObj);
+
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'Profile updated successfully',
+            'req' => $FormObj,
+        ]);
+    }
+
+    //
+    // password update
+    //
+    public function passwordUpdate(Request $request, $id)
+    {
+        $FormObj = $request->all();
+
+        $hashedPassword = Auth::user()->password;
+
+        if (Hash::check($FormObj['currentPassword'], $hashedPassword)) {
+            if (!Hash::check($FormObj['confirmPassword'], $hashedPassword)) {
+                $users = User::find(Auth::user()->id);
+                $users->password = bcrypt($FormObj['confirmPassword']);
+                User::where('id', Auth::user()->id)->update(['password' =>  $users->password]);
+                return response()->json([
+                    'success' => true,
+                    'status' => 200,
+                    'message' => 'password has been updated successfully',
+
+                ], 200);
+            } else {
+                return response()->json([
+                    'success' => true,
+                    'status' => 200,
+                    'message' => 'new password can not be the old password',
+
+                ], 401);
+            }
+        } else {
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'current password is not matched',
+
+            ], 401);
+        }
+    }
+    //
+    // UPDATE User Account
+    //
     public function update(Request $request, $id)
     {
         $FormObj = $this->GetForm($request);
@@ -364,14 +638,8 @@ class AuthController extends Controller
         $obj->save();
 
         if ($FormObj['withInfo'] != 0) {
-
-
-
             $addtional_info =  UserInformation::where('user_id', $id)->get();
-
-            // return count(($addtional_info));
             if (count(($addtional_info)) < 1) {
-
                 $storeObj_addtional =  UserInformation::create(
                     [
                         'user_id' => $id,
@@ -383,7 +651,6 @@ class AuthController extends Controller
                         'city' => $FormObj['withInfo']['city']['id'],
                         'zip_code' => $FormObj['withInfo']['zip_code'],
                         'country' => $FormObj['withInfo']['country']['id'],
-
                     ]
                 );
             } else {
@@ -409,7 +676,6 @@ class AuthController extends Controller
             'message' => 'User updated successfully',
             'foundedData' => $obj,
             // '$storeObj_addtional ' =>  $storeObj_addtional,
-
         ], 200);
     }
 
@@ -418,8 +684,7 @@ class AuthController extends Controller
     //
     public function show($id)
     {
-        $objUser = User::with('City', 'Location','AdditionalInformation.city', 'AdditionalInformation.country')->find($id);
-        // $objUser = User::with('City')->find($id);
+        $objUser = User::with('City', 'Location', 'AdditionalInformation.city', 'AdditionalInformation.country')->find($id);
         return response()->json([
             'success' => true,
             'selected_user' => $objUser

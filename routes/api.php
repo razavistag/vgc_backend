@@ -38,13 +38,17 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('user/{id}', [AuthController::class, 'show']);
     Route::delete('user/{id}', [AuthController::class, 'destroy']);
     Route::put('user/{id}', [AuthController::class, 'update']);
+    Route::put('user/profile/{id}', [AuthController::class, 'profileUpdate']);
     Route::put('user/profileUpdate/{id}', [AuthController::class, 'profileUpdate']);
+    Route::put('user/passwordUpdate/{id}', [AuthController::class, 'passwordUpdate']);
     Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
     Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
 
 
     // DASHBOARD ROUES
     Route::get('dashboard/statment', [AuthController::class, 'dashboardStatment']);
+    Route::get('dashboard/orderStatment', [AuthController::class, 'orderStatment']);
+    Route::get('dashboard/poStatment', [AuthController::class, 'poStatment']);
 
 
     // ORDER ROUTES
