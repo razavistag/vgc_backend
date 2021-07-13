@@ -41,6 +41,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('user/profile/{id}', [AuthController::class, 'profileUpdate']);
     Route::put('user/profileUpdate/{id}', [AuthController::class, 'profileUpdate']);
     Route::put('user/passwordUpdate/{id}', [AuthController::class, 'passwordUpdate']);
+    Route::put('user/profileImageUpdate/{id}', [AuthController::class, 'profileImageUpdate']);
     Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
     Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
 

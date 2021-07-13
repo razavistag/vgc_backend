@@ -586,6 +586,33 @@ class AuthController extends Controller
             ], 401);
         }
     }
+
+    //
+    // profile image update
+    //
+    public function profileImageUpdate(Request $request, $id)
+    {
+        $FormObj = $this->GetForm($request);
+
+        $obj = User::find($id);
+        $now = Carbon::now()->timestamp;
+        if ($request->input('profilePic')) {
+            $image_string = $request->input('profilePic');
+            preg_match("/data:image\/(.*?);/", $image_string, $image_extension);
+            $image_string = preg_replace('/data:image\/(.*?);base64,/', '', $image_string);
+            $image_string = str_replace(' ', '+', $image_string);
+            $image_name_string  = rand(10, 1000) . '_' . $now . '_' . 'image_' . rand(10, 1000) . '.' . $image_extension[1];
+            Storage::disk('public')->put($image_name_string, base64_decode($image_string));
+            $obj['profilePic'] = $image_name_string;
+        }
+        $obj->save();
+        $user = $obj;
+        return response()->json([
+            'success' => true,
+            'user_information' => ['id' => $user->id, 'name' => $user->name, 'phone' => $user->phone, 'profile' => $user->profilePic, 'role' => $user->role],
+        ]);
+    }
+
     //
     // UPDATE User Account
     //
