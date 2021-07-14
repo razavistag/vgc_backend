@@ -469,7 +469,22 @@ class AuthController extends Controller
             'objects' => $objects
         ]);
     }
+    public function gustRegister(Request $request)
+    {
+        $FormObj = $this->GetForm($request);
+        $FormObj['password'] = bcrypt($FormObj['password']);
 
+        $FormObj['access'] = json_encode($FormObj['access']);
+
+        $storeObj =  User::create($FormObj);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User created successfully',
+            'req' =>
+            $FormObj,
+        ], 200);
+    }
     public function register(Request $request)
     {
         DB::beginTransaction();

@@ -33,11 +33,12 @@ class UserFactory extends Factory
             'gender' => 'MALE',
             'status' => 1,
             'access' => json_encode([
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3)),    // 0 - dashboard
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3)),    // 1 - order
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3)),    // 2 - po
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3)),    // 3 - user
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3)),    // 4 - receiving log entery
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3)),    // 0 - dashboard
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3)),    // 1 - order
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3)),    // 2 - po
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3)),    // 3 - user
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3)),    // 4 - receiving log entery
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3)),    // 5 - location
             ]),
             'role' => 0,
             'email_verified_at' => now(),

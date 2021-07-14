@@ -17,10 +17,11 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\PoController;
 use App\Http\Controllers\ReceivinglogenteryController;
 
-
+Route::post('gustRegister', [AuthController::class, 'gustRegister']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:api');
@@ -92,6 +93,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('receivinglogentries/{id}', [ReceivinglogenteryController::class, 'update']);
     Route::get('receivinglogentries/getAttachments/{find}', [ReceivinglogenteryController::class, 'getAttachments']);
     Route::delete('receivinglogentries/attachment/{id}', [ReceivinglogenteryController::class, 'destroyAttachment']);
+
+    // LOCATION
+    Route::get('location', [LocationController::class, 'index']);
+    Route::get('location/search/{find}', [LocationController::class, 'show']);
+    Route::delete('location/{id}', [LocationController::class, 'destroy']);
+    Route::get('location/edit/{find}', [LocationController::class, 'edit']);
+    Route::put('location/{id}', [LocationController::class, 'update']);
+    Route::post('location', [LocationController::class, 'store']);
 
 
 
