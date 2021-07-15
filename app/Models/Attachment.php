@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class Attachment extends Model
+class Attachment extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
+
     protected $fillable = [
         'document_auto_id',
         'document_type',

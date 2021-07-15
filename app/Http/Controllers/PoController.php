@@ -392,7 +392,7 @@ class PoController extends Controller
             $objFetch = Po::findOrFail($request->id);
             $objFetch->approved_by = $request->approved_by;
             $objFetch->completed_by = $request->completed_by;
-            $objFetch->po_date = $request->po_date;
+            // $objFetch->po_date = $request->po_date;
             $objFetch->season = $request->season;
             $objFetch->status = $request->status;
             $objFetch->total_value = $request->total_value;

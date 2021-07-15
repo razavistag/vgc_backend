@@ -159,7 +159,6 @@ class OrderController extends Controller
     public function updateStatus(Request $request)
     {
         DB::beginTransaction();
-
         try {
             $userName = Auth::user()->name;
             $userID = Auth::user()->id;
