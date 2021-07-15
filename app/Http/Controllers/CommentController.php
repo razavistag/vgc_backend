@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\Po;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class CommentController extends Controller
@@ -39,90 +40,106 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
-
-        if ($request->operation == 'ORDER#') {
-            $status = ' Received this ';
-            $documentID =  Order::take('1')->orderby('id', 'desc')->first();
-            if ($documentID) {
-                $documentID = $documentID->id + 1;
-            } else {
-                $documentID = 1;
+        DB::beginTransaction();
+        try {
+            if ($request->operation == 'ORDER#') {
+                $status = ' Received this ';
+                $documentID =  Order::take('1')->orderby('id', 'desc')->first();
+                if ($documentID) {
+                    $documentID = $documentID->id + 1;
+                } else {
+                    $documentID = 1;
+                }
             }
-        }
 
-        if ($request->operation == 'PO#') {
-            $status = ' Requested this  ';
-            $documentID =  Po::take('1')->orderby('id', 'desc')->first();
-            if ($documentID) {
-                $documentID = $documentID->id + 1;
-            } else {
-                $documentID = 1;
+            if ($request->operation == 'PO#') {
+                $status = ' Requested this  ';
+                $documentID =  Po::take('1')->orderby('id', 'desc')->first();
+                if ($documentID) {
+                    $documentID = $documentID->id + 1;
+                } else {
+                    $documentID = 1;
+                }
             }
+
+            $user = Auth::user();
+            $time = time();
+
+            $storeObj =  Comment::create(
+                [
+                    'type_id' => 0,
+                    'document_id' => $documentID,
+                    'document_status' => $request->status,
+                    'hrm_auto_id' => $user->id,
+                    'email_add' => null,
+                    'hrm_name' => $user->name,
+                    'is_read' => 0,
+                    'is_send_email' => 0,
+                    'current_time' => $time,
+                    'comment' => $user->name . $status . $request->operation . $documentID . ' on ' . date("D Y-m-d h:i:s A", $time),
+                ]
+            );
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-
-        $user = Auth::user();
-        $time = time();
-
-        $storeObj =  Comment::create(
-            [
-                'type_id' => 0,
-                'document_id' => $documentID,
-                'document_status' => $request->status,
-                'hrm_auto_id' => $user->id,
-                'email_add' => null,
-                'hrm_name' => $user->name,
-                'is_read' => 0,
-                'is_send_email' => 0,
-                'current_time' => $time,
-                'comment' => $user->name . $status . $request->operation . $documentID . ' on ' . date("D Y-m-d h:i:s A", $time),
-            ]
-        );
     }
 
     public function sendMessage(Request $request)
     {
-        $user = Auth::user();
-        $time = time();
-        if ($request->mailList) {
-            $mailList = json_encode($request->mailList);
-            $mailBox = $request->mailList;
-        } else {
-            $mailList = null;
-        }
-        $storeObj =  Comment::create(
-            [
-                'type_id' => 0,
-                'document_id' => $request->data_id['id'],
-                'document_status' =>  $request->data_id['status'],
-                'hrm_auto_id' => $user->id,
-                'email_add' => $mailList,
-                'hrm_name' => $user->name,
-                'is_read' => 0,
-                'is_send_email' => 1,
-                'current_time' => $time,
-                'comment' => $request->message,
-            ]
-        );
-
-        if (isset($mailBox)) {
-
-            foreach ($mailBox as $i) {
-                Mail::send(new commentMail(['object' => $storeObj, 'emailTo' => $i, 'comment' => $request->message]));
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            $time = time();
+            if ($request->mailList) {
+                $mailList = json_encode($request->mailList);
+                $mailBox = $request->mailList;
+            } else {
+                $mailList = null;
             }
+            $storeObj =  Comment::create(
+                [
+                    'type_id' => 0,
+                    'document_id' => $request->data_id['id'],
+                    'document_status' =>  $request->data_id['status'],
+                    'hrm_auto_id' => $user->id,
+                    'email_add' => $mailList,
+                    'hrm_name' => $user->name,
+                    'is_read' => 0,
+                    'is_send_email' => 1,
+                    'current_time' => $time,
+                    'comment' => $request->message,
+                ]
+            );
+
+            if (isset($mailBox)) {
+
+                foreach ($mailBox as $i) {
+                    Mail::send(new commentMail(['object' => $storeObj, 'emailTo' => $i, 'comment' => $request->message]));
+                }
+            }
+
+
+            $getMessage = $this->show($request->data_id['id']);
+            DB::commit();
+            return response()->json([
+                'req' => $request->all(),
+                'succcess' => true,
+                'objects' => collect($getMessage->original['objects'])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-
-
-        $getMessage = $this->show($request->data_id['id']);
-
-        // return collect($getMessage->original['objects'])->toJson();
-        // return $getMessage->status;
-
-
-        return response()->json([
-            'req' => $request->all(),
-            'succcess' => true,
-            'objects' => collect($getMessage->original['objects'])
-        ]);
     }
 
     /**
@@ -133,24 +150,31 @@ class CommentController extends Controller
      */
     public function show($id)
     {
-        // date("D Y-m-d h:i:s A", $time)
-        $objects = Comment::with('user:id,name,profilePic')
-        ->where('document_id', $id)
-        ->orderBy('id','desc')
-        ->limit(6)->get();
-        $objects->each(function ($item, $key) {
-            if ($item->is_read == 0) return $item->is_read = 'Mark as read';
-            if ($item->is_read == 1) return $item->is_read = 'Mark as unread';
-        });
-        $objects->each(function ($item, $key) {
-            return $item->current_time  = date("D Y-m-d h:i:s A",  $item->current_time);
-        });
+        try {
+            $objects = Comment::with('user:id,name,profilePic')
+                ->where('document_id', $id)
+                ->orderBy('id', 'desc')
+                ->limit(6)->get();
+            $objects->each(function ($item, $key) {
+                if ($item->is_read == 0) return $item->is_read = 'Mark as read';
+                if ($item->is_read == 1) return $item->is_read = 'Mark as unread';
+            });
+            $objects->each(function ($item, $key) {
+                return $item->current_time  = date("D Y-m-d h:i:s A",  $item->current_time);
+            });
 
-        return response()->json([
-            'succcess' => true,
-            'objects' => $objects,
-            'status'=>200
-        ]);
+            return response()->json([
+                'succcess' => true,
+                'objects' => $objects,
+                'status' => 200
+            ]);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -164,7 +188,7 @@ class CommentController extends Controller
         //
     }
 
-    public function order_status($status, $document_id)
+    public function order_status($status, $document_id, $operation)
     {
         $user = Auth::user();
         $time = time();
@@ -224,12 +248,12 @@ class CommentController extends Controller
         if ($oldStatus['document_status'] == 8) {
             $setStatus  = 'Pull stock';
         }
-        $message = $user->name . ' Changed from ' . $setStatus . ' to ' . $status . ' on ' . date("D Y-m-d h:i:s A", $time);
+        $message = $user->name . ' Changed this ' . $operation . ' from ' . $setStatus . ' to ' . $status . ' on ' . date("D Y-m-d h:i:s A", $time);
 
         return $message;
     }
 
-    public function po_status($status, $document_id)
+    public function po_status($status, $document_id, $operation)
     {
         $user = Auth::user();
         $time = time();
@@ -296,11 +320,40 @@ class CommentController extends Controller
             $setStatus  = 'Canceled';
         }
 
-        $message = $user->name . ' Changed from ' . $setStatus . ' to ' . $status . ' on ' . date("D Y-m-d h:i:s A", $time);
+        $message = $user->name . ' Changed this ' . $operation . ' from ' . $setStatus . ' to ' . $status . ' on ' . date("D Y-m-d h:i:s A", $time);
 
         return $message;
     }
 
+    public function mark_read(Request $request, $id)
+    {
+        DB::beginTransaction();
+        try {
+            $obj = Comment::find($id);
+            if ($request->is_read == 'Mark as read') {
+                $obj->is_read = 1;
+            }
+            if ($request->is_read == 'Mark as unread') {
+                $obj->is_read = 0;
+            }
+            $obj->save();
+            // return  [$request->is_read, $obj];
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'read information updated',
+                // 'data' => $storeObj
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
+    }
 
     /**
      * Update the specified resource in storage.
@@ -311,30 +364,39 @@ class CommentController extends Controller
      */
     public function update(Request $request)
     {
-
-        $user = Auth::user();
-        $time = time();
-        if ($request->statusMood == 'order_status') {
-            $message =  $this->order_status($request->status, $request->id);
+        DB::beginTransaction();
+        try {
+            $user = Auth::user();
+            $time = time();
+            if ($request->statusMood == 'order_status') {
+                $message =  $this->order_status($request->status, $request->id, $request->operation);
+            }
+            if ($request->statusMood == 'po_status') {
+                $message =  $this->po_status($request->status, $request->id, $request->operation);
+            }
+            $storeObj =  Comment::create(
+                [
+                    'type_id' => 0,
+                    'document_id' => $request->id,
+                    'document_status' => $request->status,
+                    'hrm_auto_id' => $user->id,
+                    'email_add' => null,
+                    'hrm_name' => $user->name,
+                    'is_read' => 0,
+                    'is_send_email' => 0,
+                    'current_time' => $time,
+                    'comment' => $message,
+                ]
+            );
+            DB::commit();
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-        if ($request->statusMood == 'po_status') {
-            $message =  $this->po_status($request->status, $request->id);
-        }
-        $storeObj =  Comment::create(
-            [
-                'type_id' => 0,
-                'document_id' => $request->id,
-                'document_status' => $request->status,
-                'hrm_auto_id' => $user->id,
-                'email_add' => null,
-                'hrm_name' => $user->name,
-                'is_read' => 0,
-                'is_send_email' => 0,
-                'current_time' => $time,
-
-                'comment' => $message,
-            ]
-        );
     }
 
     /**
@@ -348,7 +410,6 @@ class CommentController extends Controller
         //
     }
 }
-
         // GET CURRENT TIMESTEMP
         // $t = time();
         // echo ($t . "<br>");

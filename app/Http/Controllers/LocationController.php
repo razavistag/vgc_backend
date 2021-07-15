@@ -15,15 +15,21 @@ class LocationController extends Controller
      */
     public function index()
     {
-        $objFetch = Location::orderby('id', 'desc')
-            ->paginate(20);
+        try {
+            $objFetch = Location::orderby('id', 'desc')
+                ->paginate(20);
 
-
-
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
 
@@ -51,8 +57,6 @@ class LocationController extends Controller
             $FormObj = $this->GetForm($request);
             $storeObj =  Location::create($FormObj);
 
-
-
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -63,7 +67,6 @@ class LocationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
-
             return response()->json([
                 'success' => false,
                 'message' => 'PLEASE TRY AGAIN LATER',
@@ -79,19 +82,27 @@ class LocationController extends Controller
      */
     public function show($location)
     {
-        $objFetch = Location::where('location_name',  'like', '%' . $location . '%')
-            ->orWhere('location_city',  'like', '%' . $location . '%')
-            ->orWhere('location_zip_code',  'like', '%' . $location . '%')
-            ->orWhere('location_country',  'like', '%' . $location . '%')
-            ->orWhere('location_phone',  'like', '%' . $location . '%')
-            ->orWhere('location_address',  'like', '%' . $location . '%')
-            ->limit(10)->get();
+        try {
+            $objFetch = Location::where('location_name',  'like', '%' . $location . '%')
+                ->orWhere('location_city',  'like', '%' . $location . '%')
+                ->orWhere('location_zip_code',  'like', '%' . $location . '%')
+                ->orWhere('location_country',  'like', '%' . $location . '%')
+                ->orWhere('location_phone',  'like', '%' . $location . '%')
+                ->orWhere('location_address',  'like', '%' . $location . '%')
+                ->limit(10)->get();
 
 
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -102,12 +113,19 @@ class LocationController extends Controller
      */
     public function edit($location)
     {
-
-        $objFetch = Location::find($location);
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+        try {
+            $objFetch = Location::find($location);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -146,7 +164,6 @@ class LocationController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
-
             return response()->json([
                 'success' => false,
                 'message' => 'PLEASE TRY AGAIN LATER',

@@ -22,15 +22,35 @@ class PoController extends Controller
 
     public function index()
     {
-        $objFetch = Po::orderby('id', 'desc')->with('Attachment', "CompletedBy:id,name", "approvedBy:id,name", "RequestedBy:id,name", "Agent:id,agent_name,agent_code")
-            ->paginate(20);
-        $this->rePhase($objFetch);
+        try {
+            $document_type = 'Po';
+            $objFetch = Po::orderby('id', 'desc')
+                ->with(
+                    [
+                        "CompletedBy:id,name",
+                        "approvedBy:id,name",
+                        "RequestedBy:id,name",
+                        "Agent:id,agent_name,agent_code",
+                        'Attachment' => function ($q) use ($document_type) {
+                            $q->where('document_name', $document_type);
+                        },
+                    ]
+                )
+                ->paginate(20);
+            $this->rePhase($objFetch);
 
 
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -51,10 +71,9 @@ class PoController extends Controller
      */
     public function store(Request $request)
     {
+        DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);
-
-
             app()->call('App\Http\Controllers\CommentController@store');
 
             $poID = Po::take('1')->orderby('id', 'desc')->first();
@@ -84,6 +103,7 @@ class PoController extends Controller
             }
 
             $storeObj =  Po::create($FormObj);
+            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -92,10 +112,8 @@ class PoController extends Controller
                 'data' => $storeObj
             ]);
         } catch (\Exception $e) {
-
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
-
             return response()->json([
                 'success' => false,
                 'status' => 500,
@@ -107,11 +125,25 @@ class PoController extends Controller
 
     public function getAttachments($task)
     {
-        $objFetch = Attachment::where('document_auto_id', $task)->get();
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+        try {
+            $objFetch = Attachment::where(
+                [
+                    ['document_auto_id', $task],
+                    ['document_name', 'Po'],
+
+                ]
+            )->get();
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -122,54 +154,68 @@ class PoController extends Controller
      */
     public function show($po)
     {
-        $objFetch = Po::where('po_number',  'like', '%' . $po . '%')
-            ->orWhere('control_number',  'like', '%' . $po . '%')
-            ->orWhere('completed_by',  'like', '%' . $po . '%')
-            ->orWhere('receiver',  'like', '%' . $po . '%')
-            ->limit(10)->get();
-        $this->rePhase($objFetch);
+        try {
+            $objFetch = Po::where('po_number',  'like', '%' . $po . '%')
+                ->orWhere('control_number',  'like', '%' . $po . '%')
+                ->orWhere('completed_by',  'like', '%' . $po . '%')
+                ->orWhere('receiver',  'like', '%' . $po . '%')
+                ->limit(10)->get();
+            $this->rePhase($objFetch);
 
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
     public function autoComplete($type, $find)
     {
+        try {
+            if ($type == 'agent') {
+                $objectFind = Agent::orderby('id', 'desc')
+                    ->where(
+                        'agent_name',
+                        'like',
+                        '%' . $find . '%',
 
-        if ($type == 'agent') {
-            $objectFind = Agent::orderby('id', 'desc')
-                ->where(
-                    'agent_name',
-                    'like',
-                    '%' . $find . '%',
+                    )->limit(8)->get();
+            }
+            if ($type == 'vendor') {
+                $objectFind = Vendor::orderby('id', 'desc')
+                    ->where(
+                        'name',
+                        'like',
+                        '%' . $find . '%',
 
-                )->limit(8)->get();
+                    )->limit(8)->get();
+            }
+            if ($type == 'customer') {
+                $objectFind = Customer::orderby('id', 'desc')
+                    ->where(
+                        'name',
+                        'like',
+                        '%' . $find . '%',
+
+                    )->limit(8)->get();
+            }
+
+            return response()->json([
+                'success' => true,
+                'object' => $objectFind
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-        if ($type == 'vendor') {
-            $objectFind = Vendor::orderby('id', 'desc')
-                ->where(
-                    'name',
-                    'like',
-                    '%' . $find . '%',
-
-                )->limit(8)->get();
-        }
-        if ($type == 'customer') {
-            $objectFind = Customer::orderby('id', 'desc')
-                ->where(
-                    'name',
-                    'like',
-                    '%' . $find . '%',
-
-                )->limit(8)->get();
-        }
-
-
-        return response()->json([
-            'success' => true,
-            'object' => $objectFind
-        ], 200);
     }
     /**
      * Show the form for editing the specified resource.
@@ -179,20 +225,30 @@ class PoController extends Controller
      */
     public function edit($po)
     {
-        $objFetch = Po::with(
-            'Customer:id,name,email',
-            'Vendor:id,name,email,code',
-            'Agent',
-            'Attachment'
-        )->find($po);
+        try {
+            $document_type = 'Po';
+            $objFetch = Po::with(
+                [
+                    'Customer:id,name,email',
+                    'Vendor:id,name,email,code',
+                    'Agent',
+                    'Attachment' => function ($q) use ($document_type) {
+                        $q->where('document_name', $document_type);
+                    }
+                ]
+            )->find($po);
 
-        // $this->rePhase($objFetch);
-
-
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -204,41 +260,52 @@ class PoController extends Controller
      */
     public function update(Request $request, $po)
     {
-        $FormObj = $this->GetForm($request);
-        app()->call('App\Http\Controllers\CommentController@store');
+        DB::beginTransaction();
 
-        if (isset($FormObj['attachment'])) {
-            if (isset($FormObj['attachment'][0])) {
-                $checkExsist = substr($FormObj['attachment'][0], 0, 2);
-                if ($checkExsist != 'Po') {
-                    foreach ($FormObj['attachment'] as $k => $i) {
-                        $now = Carbon::now()->timestamp;
-                        $randomName  = 'Po_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
-                        $i->storeAs('/public/Po_attachments', $randomName . $i->getClientOriginalExtension());
-                        $storeObj =  Attachment::create([
-                            'file_name' => $randomName . $i->getClientOriginalExtension(),
-                            'file_extention' =>  $i->getClientOriginalExtension(),
-                            'file_size' =>  $i->getSize(),
-                            'document_auto_id' =>  $po,
-                            'document_name' =>  'Po',
-                        ]);
+        try {
+            $FormObj = $this->GetForm($request);
+            app()->call('App\Http\Controllers\CommentController@store');
+
+            if (isset($FormObj['attachment'])) {
+                if (isset($FormObj['attachment'][0])) {
+                    $checkExsist = substr($FormObj['attachment'][0], 0, 2);
+                    if ($checkExsist != 'Po') {
+                        foreach ($FormObj['attachment'] as $k => $i) {
+                            $now = Carbon::now()->timestamp;
+                            $randomName  = 'Po_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
+                            $i->storeAs('/public/Po_attachments', $randomName . $i->getClientOriginalExtension());
+                            $storeObj =  Attachment::create([
+                                'file_name' => $randomName . $i->getClientOriginalExtension(),
+                                'file_extention' =>  $i->getClientOriginalExtension(),
+                                'file_size' =>  $i->getSize(),
+                                'document_auto_id' =>  $po,
+                                'document_name' =>  'Po',
+                            ]);
+                        }
                     }
                 }
             }
+            unset($FormObj['attachment']);
+            unset($FormObj['operation']);
+            $storeObj = Po::where('id', $po)
+                ->update($FormObj);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'Order UPDATED successfully',
+                'data' => $storeObj,
+                'req' => $FormObj
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-        unset($FormObj['attachment']);
-        unset($FormObj['operation']);
-        $storeObj = Po::where('id', $po)
-            ->update($FormObj);
-
-
-        return response()->json([
-            'success' => true,
-            'status' => 200,
-            'message' => 'Order UPDATED successfully',
-            'data' => $storeObj,
-            'req' => $FormObj
-        ]);
     }
 
     /**
@@ -296,62 +363,85 @@ class PoController extends Controller
     }
     public function getStatus($po)
     {
-        $objFetch = Po::select('id', 'po_date', 'completed_by', 'approved_by', 'total_value', 'season', 'status')->with("CompletedBy:id,name,email", "approvedBy:id,name,email")->where('id', $po)->get();
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+        try {
+            $objFetch = Po::select('id', 'po_date', 'completed_by', 'approved_by', 'total_value', 'season', 'status')
+                ->with(
+                    "CompletedBy:id,name,email",
+                    "approvedBy:id,name,email"
+                )->where('id', $po)->get();
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function updateStatus(Request $request)
     {
 
-
-        $userName = Auth::user()->name;
-        $userID = Auth::user()->id;
-        $objFetch = Po::findOrFail($request->id);
-        $objFetch->approved_by = $request->approved_by;
-        $objFetch->completed_by = $request->completed_by;
-        $objFetch->po_date = $request->po_date;
-        $objFetch->season = $request->season;
-        $objFetch->status = $request->status;
-        $objFetch->total_value = $request->total_value;
-        if ($request->status == 0) {
-            $objFetch->receiver = Auth::user()->name;
-            $objFetch->receiver_auto_id = Auth::user()->id;
-        } elseif ($request->status == 1) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 2) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 3) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 4) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 5) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 6) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 7) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 8) {
-            $objFetch->completed_by = $userID;
-        } elseif ($request->status == 9) {
-            $objFetch->completed_by = $userID;
-        }
-        if ($request->completed_by) {
+        DB::beginTransaction();
+        try {
+            $userName = Auth::user()->name;
+            $userID = Auth::user()->id;
+            $objFetch = Po::findOrFail($request->id);
+            $objFetch->approved_by = $request->approved_by;
             $objFetch->completed_by = $request->completed_by;
+            $objFetch->po_date = $request->po_date;
+            $objFetch->season = $request->season;
+            $objFetch->status = $request->status;
+            $objFetch->total_value = $request->total_value;
+            if ($request->status == 0) {
+                $objFetch->receiver = Auth::user()->name;
+                $objFetch->receiver_auto_id = Auth::user()->id;
+            } elseif ($request->status == 1) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 2) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 3) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 4) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 5) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 6) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 7) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 8) {
+                $objFetch->completed_by = $userID;
+            } elseif ($request->status == 9) {
+                $objFetch->completed_by = $userID;
+            }
+            if ($request->completed_by) {
+                $objFetch->completed_by = $request->completed_by;
+            }
+
+
+            $objFetch->save();
+            app()->call('App\Http\Controllers\CommentController@update');
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Status updated',
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-
-
-        $objFetch->save();
-        app()->call('App\Http\Controllers\CommentController@update');
-
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Status updated',
-            'objects' => $objFetch
-        ], 200);
     }
 
     public function rePhase($object)

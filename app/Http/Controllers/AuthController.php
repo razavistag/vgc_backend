@@ -2,11 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agent;
+use App\Models\Customer;
 use App\Models\Location;
 use App\Models\Order;
 use App\Models\Po;
 use App\Models\User;
 use App\Models\UserInformation;
+use App\Models\Vendor;
 use Carbon\Carbon;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
@@ -19,477 +22,571 @@ class AuthController extends Controller
 {
     public function index()
     {
-        // $objUser = User::with('AdditionalInformation')->orderby('id', 'desc')->paginate(20);
-        $objUser = User::orderby('id', 'desc')->paginate(20);
-        $this->rePhaseRole($objUser);
+
+        try {
+            // $objUser = User::with('AdditionalInformation')->orderby('id', 'desc')->paginate(20);
+            $objUser = User::orderby('id', 'desc')->paginate(20);
+            $this->rePhaseRole($objUser);
 
 
-        return response()->json([
-            'success' => true,
-            'users' => $objUser
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'users' => $objUser
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
     public function dashboardStatment()
     {
-        // ORDER RECEVIED
-        $recevied = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 0)
-            ->groupBy('order_type')
-            ->get();
+        try {
+            // ORDER RECEVIED
+            $recevied = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 0)
+                ->groupBy('order_type')
+                ->get();
 
-        $receviedBulk = $receviedRelase = $receviedDistiribute = 0;
-        foreach ($recevied as $rec) {
-            if ($rec->order_type == 1) $receviedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $receviedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $receviedDistiribute = $rec->order_count;
-        }
+            $receviedBulk = $receviedRelase = $receviedDistiribute = 0;
+            foreach ($recevied as $rec) {
+                if ($rec->order_type == 1) $receviedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $receviedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $receviedDistiribute = $rec->order_count;
+            }
 
-        // ORDER WORKING
-        $working = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 1)
-            ->groupBy('order_type')
-            ->get();
+            // ORDER WORKING
+            $working = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 1)
+                ->groupBy('order_type')
+                ->get();
 
-        $workingBulk = $workingRelase = $workingDistiribute = 0;
-        foreach ($working as $rec) {
-            if ($rec->order_type == 1) $workingRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $workingBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $workingDistiribute = $rec->order_count;
-        }
+            $workingBulk = $workingRelase = $workingDistiribute = 0;
+            foreach ($working as $rec) {
+                if ($rec->order_type == 1) $workingRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $workingBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $workingDistiribute = $rec->order_count;
+            }
 
-        // ORDER COMPLETED
-        $completed = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 2)
-            ->groupBy('order_type')
-            ->get();
+            // ORDER COMPLETED
+            $completed = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 2)
+                ->groupBy('order_type')
+                ->get();
 
-        $completedBulk = $completedRelase = $completedDistiribute = 0;
-        foreach ($completed as $rec) {
-            if ($rec->order_type == 1) $completedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $completedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $completedDistiribute = $rec->order_count;
-        }
+            $completedBulk = $completedRelase = $completedDistiribute = 0;
+            foreach ($completed as $rec) {
+                if ($rec->order_type == 1) $completedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $completedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $completedDistiribute = $rec->order_count;
+            }
 
-        // ORDER REOPENED
-        $reopened = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 4)
-            ->groupBy('order_type')
-            ->get();
-        $reopenedBulk = $reopenedRelase = $reopenedDistiribute = 0;
-        foreach ($reopened as $rec) {
-            if ($rec->order_type == 1) $reopenedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $reopenedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $reopenedDistiribute = $rec->order_count;
-        }
+            // ORDER REOPENED
+            $reopened = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 4)
+                ->groupBy('order_type')
+                ->get();
+            $reopenedBulk = $reopenedRelase = $reopenedDistiribute = 0;
+            foreach ($reopened as $rec) {
+                if ($rec->order_type == 1) $reopenedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $reopenedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $reopenedDistiribute = $rec->order_count;
+            }
 
-        // ORDER PENDING
-        $pending = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 5)
-            ->groupBy('order_type')
-            ->get();
-        $pendingBulk = $pendingRelase = $pendingDistiribute = 0;
-        foreach ($pending as $rec) {
-            if ($rec->order_type == 1) $pendingRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $pendingBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $pendingDistiribute = $rec->order_count;
-        }
+            // ORDER PENDING
+            $pending = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 5)
+                ->groupBy('order_type')
+                ->get();
+            $pendingBulk = $pendingRelase = $pendingDistiribute = 0;
+            foreach ($pending as $rec) {
+                if ($rec->order_type == 1) $pendingRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $pendingBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $pendingDistiribute = $rec->order_count;
+            }
 
-        // ORDER NEEDREVISED
-        $needrevised = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 7)
-            ->groupBy('order_type')
-            ->get();
-        $needrevisedBulk = $needrevisedRelase = $needrevisedDistiribute = 0;
-        foreach ($needrevised as $rec) {
-            if ($rec->order_type == 1) $needrevisedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $needrevisedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $needrevisedDistiribute = $rec->order_count;
-        }
+            // ORDER NEEDREVISED
+            $needrevised = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 7)
+                ->groupBy('order_type')
+                ->get();
+            $needrevisedBulk = $needrevisedRelase = $needrevisedDistiribute = 0;
+            foreach ($needrevised as $rec) {
+                if ($rec->order_type == 1) $needrevisedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $needrevisedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $needrevisedDistiribute = $rec->order_count;
+            }
 
-        // PO -----------------------------------------------------------------------------------------
+            // PO -----------------------------------------------------------------------------------------
 
-        // PO REQUESTED
-        $requested = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 0)
-            ->groupBy('priority')
-            ->get();
+            // PO REQUESTED
+            $requested = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 0)
+                ->groupBy('priority')
+                ->get();
 
-        $requestedHigh = $requestedLow  = 0;
-        foreach ($requested as $rec) {
-            if ($rec->priority == 0) $requestedHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $requestedLow = $rec->order_count;
-        }
+            $requestedHigh = $requestedLow  = 0;
+            foreach ($requested as $rec) {
+                if ($rec->priority == 0) $requestedHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $requestedLow = $rec->order_count;
+            }
 
-        // PO WORKING
-        $poWorking = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 1)
-            ->groupBy('priority')
-            ->get();
+            // PO WORKING
+            $poWorking = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 1)
+                ->groupBy('priority')
+                ->get();
 
-        $poWorkingHigh = $poWorkingLow  = 0;
-        foreach ($poWorking as $rec) {
-            if ($rec->priority == 0) $poWorkingHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $poWorkingLow = $rec->order_count;
-        }
+            $poWorkingHigh = $poWorkingLow  = 0;
+            foreach ($poWorking as $rec) {
+                if ($rec->priority == 0) $poWorkingHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $poWorkingLow = $rec->order_count;
+            }
 
-        // PO COMPLETED
-        $poCompleted = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 2)
-            ->groupBy('priority')
-            ->get();
+            // PO COMPLETED
+            $poCompleted = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 2)
+                ->groupBy('priority')
+                ->get();
 
-        $poCompletedHigh = $poCompletedLow  = 0;
-        foreach ($poCompleted as $rec) {
-            if ($rec->priority == 0) $poCompletedHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $poCompletedLow = $rec->order_count;
-        }
+            $poCompletedHigh = $poCompletedLow  = 0;
+            foreach ($poCompleted as $rec) {
+                if ($rec->priority == 0) $poCompletedHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $poCompletedLow = $rec->order_count;
+            }
 
-        // PO REOPENED
-        $poReopened = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 3)
-            ->groupBy('priority')
-            ->get();
+            // PO REOPENED
+            $poReopened = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 3)
+                ->groupBy('priority')
+                ->get();
 
-        $poReopeneddHigh = $poReopenedLow  = 0;
-        foreach ($poReopened as $rec) {
-            if ($rec->priority == 0) $poReopenedHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $poReopenedLow = $rec->order_count;
-        }
+            $poReopeneddHigh = $poReopenedLow  = 0;
+            foreach ($poReopened as $rec) {
+                if ($rec->priority == 0) $poReopenedHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $poReopenedLow = $rec->order_count;
+            }
 
-        // PO PENDING
-        $poPending = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 4)
-            ->groupBy('priority')
-            ->get();
+            // PO PENDING
+            $poPending = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 4)
+                ->groupBy('priority')
+                ->get();
 
-        $poPendingHigh = $poPendingLow  = 0;
-        foreach ($poPending as $rec) {
-            if ($rec->priority == 0) $poPendingHigh = $rec->order_count;
-            elseif (
-                $rec->priority == 1
-            ) $poPendingLow = $rec->order_count;
-        }
+            $poPendingHigh = $poPendingLow  = 0;
+            foreach ($poPending as $rec) {
+                if ($rec->priority == 0) $poPendingHigh = $rec->order_count;
+                elseif (
+                    $rec->priority == 1
+                ) $poPendingLow = $rec->order_count;
+            }
 
-        // PO APPROVED
-        $poApproved = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 7)
-            ->groupBy('priority')
-            ->get();
+            // PO APPROVED
+            $poApproved = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 7)
+                ->groupBy('priority')
+                ->get();
 
-        $poApprovedHigh = $poApprovedLow  = 0;
-        foreach ($poApproved as $rec) {
-            if ($rec->priority == 0) $poApprovedHigh = $rec->order_count;
-            elseif (
-                $rec->priority == 1
-            ) $poApprovedLow = $rec->order_count;
-        }
+            $poApprovedHigh = $poApprovedLow  = 0;
+            foreach ($poApproved as $rec) {
+                if ($rec->priority == 0) $poApprovedHigh = $rec->order_count;
+                elseif (
+                    $rec->priority == 1
+                ) $poApprovedLow = $rec->order_count;
+            }
 
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Statement Updated',
-            'orderStatment' =>  [
-                'recevied' => [
-                    'Bulk' => $receviedBulk,
-                    'Relase' => $receviedRelase,
-                    'Distiribute' => $receviedDistiribute
+            return response()->json([
+                'success' => true,
+                'message' => 'Statement Updated',
+                'orderStatment' =>  [
+                    'recevied' => [
+                        'Bulk' => $receviedBulk,
+                        'Relase' => $receviedRelase,
+                        'Distiribute' => $receviedDistiribute
+                    ],
+                    'working' => [
+                        'Bulk' => $workingBulk,
+                        'Relase' => $workingRelase,
+                        'Distiribute' => $workingDistiribute
+                    ],
+                    'completed' => [
+                        'Bulk' => $completedBulk,
+                        'Relase' => $completedRelase,
+                        'Distiribute' => $completedDistiribute
+                    ],
+                    'reopened' => [
+                        'Bulk' => $reopenedBulk,
+                        'Relase' => $reopenedRelase,
+                        'Distiribute' => $reopenedDistiribute
+                    ],
+                    'pending' => [
+                        'Bulk' => $pendingBulk,
+                        'Relase' => $pendingRelase,
+                        'Distiribute' => $pendingDistiribute
+                    ],
+                    'needrevised' => [
+                        'Bulk' => $needrevisedBulk,
+                        'Relase' => $needrevisedRelase,
+                        'Distiribute' => $needrevisedDistiribute
+                    ],
                 ],
-                'working' => [
-                    'Bulk' => $workingBulk,
-                    'Relase' => $workingRelase,
-                    'Distiribute' => $workingDistiribute
-                ],
-                'completed' => [
-                    'Bulk' => $completedBulk,
-                    'Relase' => $completedRelase,
-                    'Distiribute' => $completedDistiribute
-                ],
-                'reopened' => [
-                    'Bulk' => $reopenedBulk,
-                    'Relase' => $reopenedRelase,
-                    'Distiribute' => $reopenedDistiribute
-                ],
-                'pending' => [
-                    'Bulk' => $pendingBulk,
-                    'Relase' => $pendingRelase,
-                    'Distiribute' => $pendingDistiribute
-                ],
-                'needrevised' => [
-                    'Bulk' => $needrevisedBulk,
-                    'Relase' => $needrevisedRelase,
-                    'Distiribute' => $needrevisedDistiribute
-                ],
-            ],
-            'poStatment' => [
-                'requested' => [
-                    'high' => $requestedHigh,
-                    'low' => $requestedLow,
-                ],
-                'working' => [
-                    'high' =>  $poWorkingHigh,
-                    'low' => $poWorkingLow,
-                ],
-                'completed' => [
-                    'high' => $poCompletedHigh,
-                    'low' => $poCompletedLow,
-                ],
-                'reopened' => [
-                    'high' => $poReopeneddHigh,
-                    'low' => $poReopenedLow,
-                ],
-                'pending' => [
-                    'high' => $poPendingHigh,
-                    'low' => $poPendingLow,
-                ],
-                'approved' => [
-                    'high' => $poApprovedHigh,
-                    'low' => $poApprovedLow,
+                'poStatment' => [
+                    'requested' => [
+                        'high' => $requestedHigh,
+                        'low' => $requestedLow,
+                    ],
+                    'working' => [
+                        'high' =>  $poWorkingHigh,
+                        'low' => $poWorkingLow,
+                    ],
+                    'completed' => [
+                        'high' => $poCompletedHigh,
+                        'low' => $poCompletedLow,
+                    ],
+                    'reopened' => [
+                        'high' => $poReopeneddHigh,
+                        'low' => $poReopenedLow,
+                    ],
+                    'pending' => [
+                        'high' => $poPendingHigh,
+                        'low' => $poPendingLow,
+                    ],
+                    'approved' => [
+                        'high' => $poApprovedHigh,
+                        'low' => $poApprovedLow,
 
-                ],
-            ]
-        ], 200);
+                    ],
+                ]
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function orderStatment()
     {
-        // ORDER RECEVIED
-        $recevied = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 0)
-            ->groupBy('order_type')
-            ->get();
+        try {
+            // ORDER RECEVIED
+            $recevied = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 0)
+                ->groupBy('order_type')
+                ->get();
 
-        $receviedBulk = $receviedRelase = $receviedDistiribute = 0;
-        foreach ($recevied as $rec) {
-            if ($rec->order_type == 1) $receviedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $receviedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $receviedDistiribute = $rec->order_count;
-        }
+            $receviedBulk = $receviedRelase = $receviedDistiribute = 0;
+            foreach ($recevied as $rec) {
+                if ($rec->order_type == 1) $receviedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $receviedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $receviedDistiribute = $rec->order_count;
+            }
 
-        // ORDER WORKING
-        $working = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 1)
-            ->groupBy('order_type')
-            ->get();
+            // ORDER WORKING
+            $working = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 1)
+                ->groupBy('order_type')
+                ->get();
 
-        $workingBulk = $workingRelase = $workingDistiribute = 0;
-        foreach ($working as $rec) {
-            if ($rec->order_type == 1) $workingRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $workingBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $workingDistiribute = $rec->order_count;
-        }
+            $workingBulk = $workingRelase = $workingDistiribute = 0;
+            foreach ($working as $rec) {
+                if ($rec->order_type == 1) $workingRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $workingBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $workingDistiribute = $rec->order_count;
+            }
 
-        // ORDER COMPLETED
-        $completed = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 2)
-            ->groupBy('order_type')
-            ->get();
+            // ORDER COMPLETED
+            $completed = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 2)
+                ->groupBy('order_type')
+                ->get();
 
-        $completedBulk = $completedRelase = $completedDistiribute = 0;
-        foreach ($completed as $rec) {
-            if ($rec->order_type == 1) $completedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $completedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $completedDistiribute = $rec->order_count;
-        }
+            $completedBulk = $completedRelase = $completedDistiribute = 0;
+            foreach ($completed as $rec) {
+                if ($rec->order_type == 1) $completedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $completedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $completedDistiribute = $rec->order_count;
+            }
 
-        // ORDER REOPENED
-        $reopened = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 4)
-            ->groupBy('order_type')
-            ->get();
-        $reopenedBulk = $reopenedRelase = $reopenedDistiribute = 0;
-        foreach ($reopened as $rec) {
-            if ($rec->order_type == 1) $reopenedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $reopenedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $reopenedDistiribute = $rec->order_count;
-        }
+            // ORDER REOPENED
+            $reopened = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 4)
+                ->groupBy('order_type')
+                ->get();
+            $reopenedBulk = $reopenedRelase = $reopenedDistiribute = 0;
+            foreach ($reopened as $rec) {
+                if ($rec->order_type == 1) $reopenedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $reopenedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $reopenedDistiribute = $rec->order_count;
+            }
 
-        // ORDER PENDING
-        $pending = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 5)
-            ->groupBy('order_type')
-            ->get();
-        $pendingBulk = $pendingRelase = $pendingDistiribute = 0;
-        foreach ($pending as $rec) {
-            if ($rec->order_type == 1) $pendingRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $pendingBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $pendingDistiribute = $rec->order_count;
-        }
+            // ORDER PENDING
+            $pending = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 5)
+                ->groupBy('order_type')
+                ->get();
+            $pendingBulk = $pendingRelase = $pendingDistiribute = 0;
+            foreach ($pending as $rec) {
+                if ($rec->order_type == 1) $pendingRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $pendingBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $pendingDistiribute = $rec->order_count;
+            }
 
-        // ORDER NEEDREVISED
-        $needrevised = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 7)
-            ->groupBy('order_type')
-            ->get();
-        $needrevisedBulk = $needrevisedRelase = $needrevisedDistiribute = 0;
-        foreach ($needrevised as $rec) {
-            if ($rec->order_type == 1) $needrevisedRelase = $rec->order_count;
-            elseif ($rec->order_type == 2) $needrevisedBulk = $rec->order_count;
-            elseif ($rec->order_type == 3) $needrevisedDistiribute = $rec->order_count;
-        }
+            // ORDER NEEDREVISED
+            $needrevised = Order::select('status', 'order_type', DB::raw('COUNT(id) as order_count'))->where('status', 7)
+                ->groupBy('order_type')
+                ->get();
+            $needrevisedBulk = $needrevisedRelase = $needrevisedDistiribute = 0;
+            foreach ($needrevised as $rec) {
+                if ($rec->order_type == 1) $needrevisedRelase = $rec->order_count;
+                elseif ($rec->order_type == 2) $needrevisedBulk = $rec->order_count;
+                elseif ($rec->order_type == 3) $needrevisedDistiribute = $rec->order_count;
+            }
 
 
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Statement Updated',
-            'orderStatment' =>  [
-                'recevied' => [
-                    'Bulk' => $receviedBulk,
-                    'Relase' => $receviedRelase,
-                    'Distiribute' => $receviedDistiribute
+            return response()->json([
+                'success' => true,
+                'message' => 'Statement Updated',
+                'orderStatment' =>  [
+                    'recevied' => [
+                        'Bulk' => $receviedBulk,
+                        'Relase' => $receviedRelase,
+                        'Distiribute' => $receviedDistiribute
+                    ],
+                    'working' => [
+                        'Bulk' => $workingBulk,
+                        'Relase' => $workingRelase,
+                        'Distiribute' => $workingDistiribute
+                    ],
+                    'completed' => [
+                        'Bulk' => $completedBulk,
+                        'Relase' => $completedRelase,
+                        'Distiribute' => $completedDistiribute
+                    ],
+                    'reopened' => [
+                        'Bulk' => $reopenedBulk,
+                        'Relase' => $reopenedRelase,
+                        'Distiribute' => $reopenedDistiribute
+                    ],
+                    'pending' => [
+                        'Bulk' => $pendingBulk,
+                        'Relase' => $pendingRelase,
+                        'Distiribute' => $pendingDistiribute
+                    ],
+                    'needrevised' => [
+                        'Bulk' => $needrevisedBulk,
+                        'Relase' => $needrevisedRelase,
+                        'Distiribute' => $needrevisedDistiribute
+                    ],
                 ],
-                'working' => [
-                    'Bulk' => $workingBulk,
-                    'Relase' => $workingRelase,
-                    'Distiribute' => $workingDistiribute
-                ],
-                'completed' => [
-                    'Bulk' => $completedBulk,
-                    'Relase' => $completedRelase,
-                    'Distiribute' => $completedDistiribute
-                ],
-                'reopened' => [
-                    'Bulk' => $reopenedBulk,
-                    'Relase' => $reopenedRelase,
-                    'Distiribute' => $reopenedDistiribute
-                ],
-                'pending' => [
-                    'Bulk' => $pendingBulk,
-                    'Relase' => $pendingRelase,
-                    'Distiribute' => $pendingDistiribute
-                ],
-                'needrevised' => [
-                    'Bulk' => $needrevisedBulk,
-                    'Relase' => $needrevisedRelase,
-                    'Distiribute' => $needrevisedDistiribute
-                ],
-            ],
 
-        ], 200);
+            ], 200);
+        } catch (\Exception $e) {
+
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
     public function poStatment()
     {
+        try {
+            // PO REQUESTED
+            $requested = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 0)
+                ->groupBy('priority')
+                ->get();
 
-        // PO REQUESTED
-        $requested = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 0)
-            ->groupBy('priority')
-            ->get();
+            $requestedHigh = $requestedLow  = 0;
+            foreach ($requested as $rec) {
+                if ($rec->priority == 0) $requestedHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $requestedLow = $rec->order_count;
+            }
 
-        $requestedHigh = $requestedLow  = 0;
-        foreach ($requested as $rec) {
-            if ($rec->priority == 0) $requestedHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $requestedLow = $rec->order_count;
-        }
+            // PO WORKING
+            $poWorking = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 1)
+                ->groupBy('priority')
+                ->get();
 
-        // PO WORKING
-        $poWorking = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 1)
-            ->groupBy('priority')
-            ->get();
+            $poWorkingHigh = $poWorkingLow  = 0;
+            foreach ($poWorking as $rec) {
+                if ($rec->priority == 0) $poWorkingHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $poWorkingLow = $rec->order_count;
+            }
 
-        $poWorkingHigh = $poWorkingLow  = 0;
-        foreach ($poWorking as $rec) {
-            if ($rec->priority == 0) $poWorkingHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $poWorkingLow = $rec->order_count;
-        }
+            // PO COMPLETED
+            $poCompleted = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 2)
+                ->groupBy('priority')
+                ->get();
 
-        // PO COMPLETED
-        $poCompleted = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 2)
-            ->groupBy('priority')
-            ->get();
+            $poCompletedHigh = $poCompletedLow  = 0;
+            foreach ($poCompleted as $rec) {
+                if ($rec->priority == 0) $poCompletedHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $poCompletedLow = $rec->order_count;
+            }
 
-        $poCompletedHigh = $poCompletedLow  = 0;
-        foreach ($poCompleted as $rec) {
-            if ($rec->priority == 0) $poCompletedHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $poCompletedLow = $rec->order_count;
-        }
+            // PO REOPENED
+            $poReopened = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 3)
+                ->groupBy('priority')
+                ->get();
 
-        // PO REOPENED
-        $poReopened = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 3)
-            ->groupBy('priority')
-            ->get();
+            $poReopeneddHigh = $poReopenedLow  = 0;
+            foreach ($poReopened as $rec) {
+                if ($rec->priority == 0) $poReopenedHigh = $rec->order_count;
+                elseif ($rec->priority == 1) $poReopenedLow = $rec->order_count;
+            }
 
-        $poReopeneddHigh = $poReopenedLow  = 0;
-        foreach ($poReopened as $rec) {
-            if ($rec->priority == 0) $poReopenedHigh = $rec->order_count;
-            elseif ($rec->priority == 1) $poReopenedLow = $rec->order_count;
-        }
+            // PO PENDING
+            $poPending = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 4)
+                ->groupBy('priority')
+                ->get();
 
-        // PO PENDING
-        $poPending = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 4)
-            ->groupBy('priority')
-            ->get();
+            $poPendingHigh = $poPendingLow  = 0;
+            foreach ($poPending as $rec) {
+                if ($rec->priority == 0) $poPendingHigh = $rec->order_count;
+                elseif (
+                    $rec->priority == 1
+                ) $poPendingLow = $rec->order_count;
+            }
 
-        $poPendingHigh = $poPendingLow  = 0;
-        foreach ($poPending as $rec) {
-            if ($rec->priority == 0) $poPendingHigh = $rec->order_count;
-            elseif (
-                $rec->priority == 1
-            ) $poPendingLow = $rec->order_count;
-        }
+            // PO APPROVED
+            $poApproved = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 7)
+                ->groupBy('priority')
+                ->get();
 
-        // PO APPROVED
-        $poApproved = Po::select('status', 'priority', DB::raw('COUNT(id) as order_count'))->where('status', 7)
-            ->groupBy('priority')
-            ->get();
-
-        $poApprovedHigh = $poApprovedLow  = 0;
-        foreach ($poApproved as $rec) {
-            if ($rec->priority == 0) $poApprovedHigh = $rec->order_count;
-            elseif (
-                $rec->priority == 1
-            ) $poApprovedLow = $rec->order_count;
-        }
+            $poApprovedHigh = $poApprovedLow  = 0;
+            foreach ($poApproved as $rec) {
+                if ($rec->priority == 0) $poApprovedHigh = $rec->order_count;
+                elseif (
+                    $rec->priority == 1
+                ) $poApprovedLow = $rec->order_count;
+            }
 
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Statement Updated',
-            'poStatment' => [
-                'requested' => [
-                    'high' => $requestedHigh,
-                    'low' => $requestedLow,
+            return response()->json([
+                'success' => true,
+                'message' => 'Statement Updated',
+                'poStatment' => [
+                    'requested' => [
+                        'high' => $requestedHigh,
+                        'low' => $requestedLow,
+                    ],
+                    'working' => [
+                        'high' =>  $poWorkingHigh,
+                        'low' => $poWorkingLow,
+                    ],
+                    'completed' => [
+                        'high' => $poCompletedHigh,
+                        'low' => $poCompletedLow,
+                    ],
+                    'reopened' => [
+                        'high' => $poReopeneddHigh,
+                        'low' => $poReopenedLow,
+                    ],
+                    'pending' => [
+                        'high' => $poPendingHigh,
+                        'low' => $poPendingLow,
+                    ],
+                    'approved' => [
+                        'high' => $poApprovedHigh,
+                        'low' => $poApprovedLow,
+
+                    ],
                 ],
-                'working' => [
-                    'high' =>  $poWorkingHigh,
-                    'low' => $poWorkingLow,
-                ],
-                'completed' => [
-                    'high' => $poCompletedHigh,
-                    'low' => $poCompletedLow,
-                ],
-                'reopened' => [
-                    'high' => $poReopeneddHigh,
-                    'low' => $poReopenedLow,
-                ],
-                'pending' => [
-                    'high' => $poPendingHigh,
-                    'low' => $poPendingLow,
-                ],
-                'approved' => [
-                    'high' => $poApprovedHigh,
-                    'low' => $poApprovedLow,
 
-                ],
-            ],
-
-        ], 200);
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function mailList()
     {
-        $objects = User::select('id', 'name', 'email')->where(function ($query) {
-            $query->where('user_type', '!=', 1);
-            $query->where('user_type', '!=', 2);
-            $query->where('user_type', '!=', 3);
-        })->get();
-        return response()->json([
-            'success' => true,
-            'objects' => $objects
-        ]);
+        try {
+            // $objects = User::select('id', 'name', 'email')->where(function ($query) {
+            //     $query->where('user_type', '!=', 1); // NOT CUSTOMER
+            //     $query->where('user_type', '!=', 2); // NOT VENDOR
+            //     $query->where('user_type', '!=', 3); // NOT SUPPLIER
+            // })->get();
+
+            $objects = User::select('id', 'name', 'email')->get();
+            return response()->json([
+                'success' => true,
+                'objects' => $objects
+            ]);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
     public function gustRegister(Request $request)
     {
-        $FormObj = $this->GetForm($request);
-        $FormObj['password'] = bcrypt($FormObj['password']);
+        DB::beginTransaction();
+        try {
+            $FormObj = $this->GetForm($request);
+            $FormObj['password'] = bcrypt($FormObj['password']);
+            $FormObj['access'] = json_encode($FormObj['access']);
+            $storeObj =  User::create($FormObj);
+            DB::commit();
 
-        $FormObj['access'] = json_encode($FormObj['access']);
+            return response()->json([
+                'success' => true,
+                'message' => 'User created successfully',
+                'req' =>
+                $FormObj,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
 
-        $storeObj =  User::create($FormObj);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'User created successfully',
-            'req' =>
-            $FormObj,
-        ], 200);
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
     public function register(Request $request)
     {
         DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);
+
+            // CUSTOMER
+            if ($FormObj['user_type'] == 1) {
+                Customer::create(
+                    [
+                        'name' => $FormObj['name'],
+                        'email' => $FormObj['email'],
+                        'phone' => $FormObj['phone'],
+                        'address' => $FormObj['address'],
+                    ]
+                );
+            }
+            // VENDOR
+            if ($FormObj['user_type'] == 2) {
+                $getLastID = User::take('1')->orderby('id', 'desc')->first();
+                Vendor::create(
+                    [
+                        'address' => $FormObj['name'],
+                        'code' => 'VE/' . $getLastID['id'],
+                        'contact' => $FormObj['phone'],
+                        'email' => $FormObj['email'],
+                        'name' => $FormObj['name'],
+                        'agent_auto_id' => $getLastID['id'],
+                    ]
+                );
+            }
+
+
+            // AGENT / SUPPLIER
+            if ($FormObj['user_type'] == 3) {
+                $getLastID = User::take('1')->orderby('id', 'desc')->first();
+                Agent::create(
+                    [
+                        'agent_name' => $FormObj['name'],
+                        'agent_code' => 'AG/' . $getLastID['id'],
+                        'agent_email' => $FormObj['email'],
+
+                    ]
+                );
+            }
 
             $FormObj['password'] = bcrypt($FormObj['password']);
             $FormObj['access'] = json_encode($FormObj['access']);
@@ -552,16 +649,29 @@ class AuthController extends Controller
 
     public function profileUpdate(Request $request, $id)
     {
-        $FormObj = $request->all();
-        $storeObj = User::where('id', $id)
-            ->update($FormObj);
+        DB::beginTransaction();
 
-        return response()->json([
-            'success' => true,
-            'status' => 200,
-            'message' => 'Profile updated successfully',
-            'req' => $FormObj,
-        ]);
+        try {
+            $FormObj = $request->all();
+            $storeObj = User::where('id', $id)
+                ->update($FormObj);
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'Profile updated successfully',
+                'req' => $FormObj,
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     //
@@ -569,36 +679,51 @@ class AuthController extends Controller
     //
     public function passwordUpdate(Request $request, $id)
     {
-        $FormObj = $request->all();
+        DB::beginTransaction();
 
-        $hashedPassword = Auth::user()->password;
+        try {
+            $FormObj = $request->all();
+            $hashedPassword = Auth::user()->password;
 
-        if (Hash::check($FormObj['currentPassword'], $hashedPassword)) {
-            if (!Hash::check($FormObj['confirmPassword'], $hashedPassword)) {
-                $users = User::find(Auth::user()->id);
-                $users->password = bcrypt($FormObj['confirmPassword']);
-                User::where('id', Auth::user()->id)->update(['password' =>  $users->password]);
-                return response()->json([
-                    'success' => true,
-                    'status' => 200,
-                    'message' => 'password has been updated successfully',
+            if (Hash::check($FormObj['currentPassword'], $hashedPassword)) {
+                if (!Hash::check($FormObj['confirmPassword'], $hashedPassword)) {
+                    $users = User::find(Auth::user()->id);
+                    $users->password = bcrypt($FormObj['confirmPassword']);
+                    User::where('id', Auth::user()->id)->update(['password' =>  $users->password]);
 
-                ], 200);
+                    DB::commit();
+                    return response()->json([
+                        'success' => true,
+                        'status' => 200,
+                        'message' => 'password has been updated successfully',
+
+                    ], 200);
+                } else {
+                    DB::commit();
+                    return response()->json([
+                        'success' => true,
+                        'status' => 200,
+                        'message' => 'new password can not be the old password',
+
+                    ], 401);
+                }
             } else {
+                DB::commit();
                 return response()->json([
                     'success' => true,
                     'status' => 200,
-                    'message' => 'new password can not be the old password',
+                    'message' => 'current password is not matched',
 
                 ], 401);
             }
-        } else {
-            return response()->json([
-                'success' => true,
-                'status' => 200,
-                'message' => 'current password is not matched',
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
 
-            ], 401);
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
     }
 
@@ -607,25 +732,38 @@ class AuthController extends Controller
     //
     public function profileImageUpdate(Request $request, $id)
     {
-        $FormObj = $this->GetForm($request);
+        DB::beginTransaction();
 
-        $obj = User::find($id);
-        $now = Carbon::now()->timestamp;
-        if ($request->input('profilePic')) {
-            $image_string = $request->input('profilePic');
-            preg_match("/data:image\/(.*?);/", $image_string, $image_extension);
-            $image_string = preg_replace('/data:image\/(.*?);base64,/', '', $image_string);
-            $image_string = str_replace(' ', '+', $image_string);
-            $image_name_string  = rand(10, 1000) . '_' . $now . '_' . 'image_' . rand(10, 1000) . '.' . $image_extension[1];
-            Storage::disk('public')->put($image_name_string, base64_decode($image_string));
-            $obj['profilePic'] = $image_name_string;
+        try {
+            $FormObj = $this->GetForm($request);
+            $obj = User::find($id);
+            $now = Carbon::now()->timestamp;
+            if ($request->input('profilePic')) {
+                $image_string = $request->input('profilePic');
+                preg_match("/data:image\/(.*?);/", $image_string, $image_extension);
+                $image_string = preg_replace('/data:image\/(.*?);base64,/', '', $image_string);
+                $image_string = str_replace(' ', '+', $image_string);
+                $image_name_string  = rand(10, 1000) . '_' . $now . '_' . 'image_' . rand(10, 1000) . '.' . $image_extension[1];
+                Storage::disk('public')->put($image_name_string, base64_decode($image_string));
+                $obj['profilePic'] = $image_name_string;
+            }
+            $obj->save();
+            $user = $obj;
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'user_information' => ['id' => $user->id, 'name' => $user->name, 'phone' => $user->phone, 'profile' => $user->profilePic, 'role' => $user->role],
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-        $obj->save();
-        $user = $obj;
-        return response()->json([
-            'success' => true,
-            'user_information' => ['id' => $user->id, 'name' => $user->name, 'phone' => $user->phone, 'profile' => $user->profilePic, 'role' => $user->role],
-        ]);
     }
 
     //
@@ -633,92 +771,104 @@ class AuthController extends Controller
     //
     public function update(Request $request, $id)
     {
-        $FormObj = $this->GetForm($request);
+        DB::beginTransaction();
 
-        // return $FormObj;
-        $obj = User::find($id);
-        $obj['access'] = json_encode($FormObj['access']);
-        $obj['account_number'] = $FormObj['account_number'];
-        $obj['address'] = $FormObj['address'];
-        $obj['attempts'] = $FormObj['attempts'];
-        $obj['balance'] = $FormObj['balance'];
-        $obj['basic_salary'] = $FormObj['basic_salary'];
-        $obj['city'] = $FormObj['city'];
-        $obj['company'] = $FormObj['company'];
-        $obj['credit_limit'] = $FormObj['credit_limit'];
-        $obj['dob'] = $FormObj['dob'];
-        $obj['email'] = $FormObj['email'];
-        // $obj['facebook_id'] = $FormObj['facebook_id'];
-        // $obj['twitter_id'] = $FormObj['twitter_id'];
-        // $obj['google_id'] = $FormObj['google_id'];
-        $obj['gender'] = $FormObj['gender'];
-        $obj['language'] = $FormObj['language'];
-        $obj['location'] = $FormObj['location'];
-        $obj['monthly_target'] = $FormObj['monthly_target'];
-        $obj['name'] = ucfirst($FormObj['name']);
-        $obj['nic'] = $FormObj['nic'];
-        $obj['opening_balance'] = $FormObj['opening_balance'];
-        $obj['payment_terms'] = $FormObj['payment_terms'];
-        $obj['phone'] = $FormObj['phone'];
-        $obj['role'] = $FormObj['role'];
-        $obj['sales_rep_id'] = $FormObj['sales_rep_id'];
-        $obj['status'] = $FormObj['status'];
-        $obj['target_percentage'] = $FormObj['target_percentage'];
-        $obj['user_type'] = $FormObj['user_type'];
-        $obj['zip'] = $FormObj['zip'];
+        try {
+            $FormObj = $this->GetForm($request);
 
-        $now = Carbon::now()->timestamp;
-        if ($request->input('profilePic')) {
-            $image_string = $request->input('profilePic');
-            preg_match("/data:image\/(.*?);/", $image_string, $image_extension);
-            $image_string = preg_replace('/data:image\/(.*?);base64,/', '', $image_string);
-            $image_string = str_replace(' ', '+', $image_string);
-            $image_name_string  = rand(10, 1000) . '_' . $now . '_' . 'image_' . rand(10, 1000) . '.' . $image_extension[1];
-            Storage::disk('public')->put($image_name_string, base64_decode($image_string));
-            $obj['profilePic'] = $image_name_string;
-        }
-        $obj->save();
+            // return $FormObj;
+            $obj = User::find($id);
+            $obj['access'] = json_encode($FormObj['access']);
+            $obj['account_number'] = $FormObj['account_number'];
+            $obj['address'] = $FormObj['address'];
+            $obj['attempts'] = $FormObj['attempts'];
+            $obj['balance'] = $FormObj['balance'];
+            $obj['basic_salary'] = $FormObj['basic_salary'];
+            $obj['city'] = $FormObj['city'];
+            $obj['company'] = $FormObj['company'];
+            $obj['credit_limit'] = $FormObj['credit_limit'];
+            $obj['dob'] = $FormObj['dob'];
+            $obj['email'] = $FormObj['email'];
+            // $obj['facebook_id'] = $FormObj['facebook_id'];
+            // $obj['twitter_id'] = $FormObj['twitter_id'];
+            // $obj['google_id'] = $FormObj['google_id'];
+            $obj['gender'] = $FormObj['gender'];
+            $obj['language'] = $FormObj['language'];
+            $obj['location'] = $FormObj['location'];
+            $obj['monthly_target'] = $FormObj['monthly_target'];
+            $obj['name'] = ucfirst($FormObj['name']);
+            $obj['nic'] = $FormObj['nic'];
+            $obj['opening_balance'] = $FormObj['opening_balance'];
+            $obj['payment_terms'] = $FormObj['payment_terms'];
+            $obj['phone'] = $FormObj['phone'];
+            $obj['role'] = $FormObj['role'];
+            $obj['sales_rep_id'] = $FormObj['sales_rep_id'];
+            $obj['status'] = $FormObj['status'];
+            $obj['target_percentage'] = $FormObj['target_percentage'];
+            $obj['user_type'] = $FormObj['user_type'];
+            $obj['zip'] = $FormObj['zip'];
 
-        if ($FormObj['withInfo'] != 0) {
-            $addtional_info =  UserInformation::where('user_id', $id)->get();
-            if (count(($addtional_info)) < 1) {
-                $storeObj_addtional =  UserInformation::create(
-                    [
-                        'user_id' => $id,
-                        'name' => $FormObj['withInfo']['name'],
-                        'contact_person' => $FormObj['withInfo']['contact_person'],
-                        'contact_number' => $FormObj['withInfo']['contact_number'],
-                        'email' => $FormObj['withInfo']['email'],
-                        'address' => $FormObj['withInfo']['address'],
-                        'city' => $FormObj['withInfo']['city']['id'],
-                        'zip_code' => $FormObj['withInfo']['zip_code'],
-                        'country' => $FormObj['withInfo']['country']['id'],
-                    ]
-                );
-            } else {
-                $storeObj_addtional =  UserInformation::where('user_id', $id)->update(
-                    [
-
-                        'name' => $FormObj['withInfo']['name'],
-                        'contact_person' => $FormObj['withInfo']['contact_person'],
-                        'contact_number' => $FormObj['withInfo']['contact_number'],
-                        'email' => $FormObj['withInfo']['email'],
-                        'address' => $FormObj['withInfo']['address'],
-                        'city' => $FormObj['withInfo']['city']['id'],
-                        'zip_code' => $FormObj['withInfo']['zip_code'],
-                        'country' => $FormObj['withInfo']['country']['id'],
-
-                    ]
-                );
+            $now = Carbon::now()->timestamp;
+            if ($request->input('profilePic')) {
+                $image_string = $request->input('profilePic');
+                preg_match("/data:image\/(.*?);/", $image_string, $image_extension);
+                $image_string = preg_replace('/data:image\/(.*?);base64,/', '', $image_string);
+                $image_string = str_replace(' ', '+', $image_string);
+                $image_name_string  = rand(10, 1000) . '_' . $now . '_' . 'image_' . rand(10, 1000) . '.' . $image_extension[1];
+                Storage::disk('public')->put($image_name_string, base64_decode($image_string));
+                $obj['profilePic'] = $image_name_string;
             }
-        }
+            $obj->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'User updated successfully',
-            'foundedData' => $obj,
-            // '$storeObj_addtional ' =>  $storeObj_addtional,
-        ], 200);
+            if ($FormObj['withInfo'] != 0) {
+                $addtional_info =  UserInformation::where('user_id', $id)->get();
+                if (count(($addtional_info)) < 1) {
+                    $storeObj_addtional =  UserInformation::create(
+                        [
+                            'user_id' => $id,
+                            'name' => $FormObj['withInfo']['name'],
+                            'contact_person' => $FormObj['withInfo']['contact_person'],
+                            'contact_number' => $FormObj['withInfo']['contact_number'],
+                            'email' => $FormObj['withInfo']['email'],
+                            'address' => $FormObj['withInfo']['address'],
+                            'city' => $FormObj['withInfo']['city']['id'],
+                            'zip_code' => $FormObj['withInfo']['zip_code'],
+                            'country' => $FormObj['withInfo']['country']['id'],
+                        ]
+                    );
+                } else {
+                    $storeObj_addtional =  UserInformation::where('user_id', $id)->update(
+                        [
+
+                            'name' => $FormObj['withInfo']['name'],
+                            'contact_person' => $FormObj['withInfo']['contact_person'],
+                            'contact_number' => $FormObj['withInfo']['contact_number'],
+                            'email' => $FormObj['withInfo']['email'],
+                            'address' => $FormObj['withInfo']['address'],
+                            'city' => $FormObj['withInfo']['city']['id'],
+                            'zip_code' => $FormObj['withInfo']['zip_code'],
+                            'country' => $FormObj['withInfo']['country']['id'],
+
+                        ]
+                    );
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'foundedData' => $obj,
+                // '$storeObj_addtional ' =>  $storeObj_addtional,
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     //
@@ -726,11 +876,19 @@ class AuthController extends Controller
     //
     public function show($id)
     {
-        $objUser = User::with('City', 'Location', 'AdditionalInformation.city', 'AdditionalInformation.country')->find($id);
-        return response()->json([
-            'success' => true,
-            'selected_user' => $objUser
-        ], 200);
+        try {
+            $objUser = User::with('City', 'Location', 'AdditionalInformation.city', 'AdditionalInformation.country')->find($id);
+            return response()->json([
+                'success' => true,
+                'selected_user' => $objUser
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
 
@@ -743,6 +901,9 @@ class AuthController extends Controller
     {
         DB::beginTransaction();
         try {
+
+            // $this->reduceAttempt($request->email);
+
             // ORDER Login Request Validation
             $this->validate(
                 $request,
@@ -756,16 +917,17 @@ class AuthController extends Controller
                 ]
             );
 
-            // ORDER Request of email and password
+            //  Request of email and password
             $credentials = request(['email', 'password']);
-            // ORDER Checking credentials and increasing attempt value by 1
+            // Checking credentials and reduce attempt value by 1
             if (!Auth::attempt($credentials)) {
                 $this->reduceAttempt($request->email);
                 return response()->json([
                     'message' => 'Unauthorized access',
-                    'pending' => true,
-                ], 401);
+                    'Unauthorized' => true,
+                ]);
             }
+
 
             // ORDER Getting & Storing Access Token
             $user = $request->user();
@@ -780,7 +942,7 @@ class AuthController extends Controller
 
             if ($user->attempts <= 0) {
                 return response()->json([
-                    'pending' => true,
+                    'attempts' => true,
                     'message' => 'You have reached the maximum login attempts. Please contact us for re-activate your account',
                 ], 401);
             }
@@ -817,7 +979,7 @@ class AuthController extends Controller
 
     public function reduceAttempt($email)
     {
-        User::where('email',  $email)->update(['attempts' => DB::raw('attempts-1')]);
+        User::where('email',  $email)->update(['attempts' => 1]);
         return  $email;
     }
 
@@ -839,19 +1001,26 @@ class AuthController extends Controller
 
     public function search($find)
     {
+        try {
+            $objUser = User::orderby('id', 'desc')
+                ->where('name', 'like', '%' . $find . '%')
+                ->orWhere('phone', 'like', '%' . $find . '%')
+                ->get();
 
-        $objUser = User::orderby('id', 'desc')
-            ->where('name', 'like', '%' . $find . '%')
-            ->orWhere('phone', 'like', '%' . $find . '%')
-            ->get();
-
-        $this->rePhaseRole($objUser);
+            $this->rePhaseRole($objUser);
 
 
-        return response()->json([
-            'success' => true,
-            'users' => $objUser
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'users' => $objUser
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function destroy($id)
@@ -880,22 +1049,37 @@ class AuthController extends Controller
 
     public function get_ac_city_additional($find)
     {
+        try {
+            $objFetch = Location::where('location_city',  'like', '%' . $find . '%')->get();
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
 
-        $objFetch = Location::where('location_city',  'like', '%' . $find . '%')->get();
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function get_ac_country_additional($find)
     {
-
-        $objFetch = Location::where('location_name',  'like', '%' . $find . '%')->get();
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+        try {
+            $objFetch = Location::where('location_name',  'like', '%' . $find . '%')->get();
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function rePhaseRole($object)

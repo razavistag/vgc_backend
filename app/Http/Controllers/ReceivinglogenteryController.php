@@ -18,17 +18,25 @@ class ReceivinglogenteryController extends Controller
      */
     public function index()
     {
-        $objFetch = Receivinglogentery::orderby('id', 'desc')
-            ->with('Attachment', 'Vendor:id,name')
-            ->paginate(20);
-        $this->rePhaseToDate($objFetch);
-        $this->rePhaseToDevition($objFetch);
+        try {
+            $objFetch = Receivinglogentery::orderby('id', 'desc')
+                ->with('Attachment', 'Vendor:id,name')
+                ->paginate(20);
+            $this->rePhaseToDate($objFetch);
+            $this->rePhaseToDevition($objFetch);
 
 
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -38,38 +46,46 @@ class ReceivinglogenteryController extends Controller
      */
     public function create(Request $request)
     {
-
-        $FormObj = $this->GetForm($request);
-
-        $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
-
-        if ($LastID) {
-            $LastID = $LastID->id;
-        } else {
-            $LastID = 1;
-        }
-
-        if (isset($FormObj['attachment'])) {
-            // return 1;
-            foreach ($FormObj['attachment'] as $k => $i) {
-                $now = Carbon::now()->timestamp;
-                $randomName  = 'RLOGENTRY_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
-                $i->storeAs('/public/receivinglogentries_attachments', $randomName . $i->getClientOriginalExtension());
-                $storeObj =  Attachment::create([
-                    'file_name' => $randomName . $i->getClientOriginalExtension(),
-                    'file_extention' =>  $i->getClientOriginalExtension(),
-                    'file_size' =>  $i->getSize(),
-                    'document_auto_id' =>  $LastID,
-                    'document_name' =>  'receivinglogentries',
-                ]);
+        DB::beginTransaction();
+        try {
+            $FormObj = $this->GetForm($request);
+            $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
+            if ($LastID) {
+                $LastID = $LastID->id;
+            } else {
+                $LastID = 1;
             }
-        }
-        return response()->json([
-            'success' => true,
-            'status' => 200,
-            'message' => 'LOG ENTERY attachment uploaded successfully',
+            if (isset($FormObj['attachment'])) {
+                // return 1;
+                foreach ($FormObj['attachment'] as $k => $i) {
+                    $now = Carbon::now()->timestamp;
+                    $randomName  = 'RLOGENTRY_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
+                    $i->storeAs('/public/receivinglogentries_attachments', $randomName . $i->getClientOriginalExtension());
+                    $storeObj =  Attachment::create([
+                        'file_name' => $randomName . $i->getClientOriginalExtension(),
+                        'file_extention' =>  $i->getClientOriginalExtension(),
+                        'file_size' =>  $i->getSize(),
+                        'document_auto_id' =>  $LastID,
+                        'document_name' =>  'receivinglogentries',
+                    ]);
+                }
+            }
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'LOG ENTERY attachment uploaded successfully',
 
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -84,9 +100,6 @@ class ReceivinglogenteryController extends Controller
         try {
             $FormObj = $this->GetForm($request);
             $storeObj =  Receivinglogentery::create($FormObj);
-
-
-
             DB::commit();
             return response()->json([
                 'success' => true,
@@ -97,7 +110,6 @@ class ReceivinglogenteryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
-
             return response()->json([
                 'success' => false,
                 'message' => 'PLEASE TRY AGAIN LATER',
@@ -113,19 +125,27 @@ class ReceivinglogenteryController extends Controller
      */
     public function show($receivinglogentery)
     {
-        $objFetch = Receivinglogentery::where('po',  'like', '%' . $receivinglogentery . '%')
-            ->orWhere('amt_shipment',  'like', '%' . $receivinglogentery . '%')
-            ->orWhere('appointment_no',  'like', '%' . $receivinglogentery . '%')
-            ->orWhere('container',  'like', '%' . $receivinglogentery . '%')
-            ->with('Attachment', 'Vendor:id,name')
-            ->limit(10)->get();
-        $this->rePhaseToDate($objFetch);
-        $this->rePhaseToDevition($objFetch);
+        try {
+            $objFetch = Receivinglogentery::where('po',  'like', '%' . $receivinglogentery . '%')
+                ->orWhere('amt_shipment',  'like', '%' . $receivinglogentery . '%')
+                ->orWhere('appointment_no',  'like', '%' . $receivinglogentery . '%')
+                ->orWhere('container',  'like', '%' . $receivinglogentery . '%')
+                ->with('Attachment', 'Vendor:id,name')
+                ->limit(10)->get();
+            $this->rePhaseToDate($objFetch);
+            $this->rePhaseToDevition($objFetch);
 
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -136,23 +156,32 @@ class ReceivinglogenteryController extends Controller
      */
     public function edit($receivinglogentery)
     {
-        $document_type = 'receivinglogentries';
-        $objFetch = Receivinglogentery::with(
-            [
-                'Vendor:id,name,email,code',
-                'Attachment' => function ($q) use ($document_type) {
-                    $q->where('document_name', $document_type);
-                }
+        DB::beginTransaction();
+        try {
+            $document_type = 'receivinglogentries';
+            $objFetch = Receivinglogentery::with(
+                [
+                    'Vendor:id,name,email,code',
+                    'Attachment' => function ($q) use ($document_type) {
+                        $q->where('document_name', $document_type);
+                    }
 
-            ]
-        )->find($receivinglogentery);
+                ]
+            )->find($receivinglogentery);
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
 
-
-
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -182,7 +211,6 @@ class ReceivinglogenteryController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
-
             return response()->json([
                 'success' => false,
                 'message' => 'PLEASE TRY AGAIN LATER',
@@ -222,31 +250,47 @@ class ReceivinglogenteryController extends Controller
 
     public function autoComplete($type, $find)
     {
-        if ($type == 'vendor') {
-            $objectFind = Vendor::orderby('id', 'desc')
-                ->where(
-                    'name',
-                    'like',
-                    '%' . $find . '%',
+        try {
+            if ($type == 'vendor') {
+                $objectFind = Vendor::orderby('id', 'desc')
+                    ->where(
+                        'name',
+                        'like',
+                        '%' . $find . '%',
 
-                )->limit(8)->get();
+                    )->limit(8)->get();
+            }
+            return response()->json([
+                'success' => true,
+                'object' => $objectFind
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
         }
-        return response()->json([
-            'success' => true,
-            'object' => $objectFind
-        ], 200);
     }
 
     public function getAttachments($id)
     {
-        $objFetch = Attachment::where([
-            ['document_auto_id', $id],
-            ['document_name', '=', 'receivinglogentries']
-        ])->get();
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+        try {
+            $objFetch = Attachment::where([
+                ['document_auto_id', $id],
+                ['document_name', '=', 'receivinglogentries']
+            ])->get();
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     public function destroyAttachment($order)

@@ -25,7 +25,8 @@ Route::post('gustRegister', [AuthController::class, 'gustRegister']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-
+Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
+Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
 
 Route::group(['middleware' => 'auth:api'], function () {
 
@@ -43,8 +44,8 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('user/profileUpdate/{id}', [AuthController::class, 'profileUpdate']);
     Route::put('user/passwordUpdate/{id}', [AuthController::class, 'passwordUpdate']);
     Route::put('user/profileImageUpdate/{id}', [AuthController::class, 'profileImageUpdate']);
-    Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
-    Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
+    // Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
+    // Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
 
 
     // DASHBOARD ROUES
@@ -81,6 +82,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     // COMMENTS ROUTES
     Route::get('comment/{id}', [CommentController::class, 'show']);
     Route::post('comment', [CommentController::class, 'sendMessage']);
+    Route::put('comment/mark_read/{id}', [CommentController::class, 'mark_read']);
 
     // RECEIVING LOG ENTERIES
     Route::get('receivinglogentries', [ReceivinglogenteryController::class, 'index']);
@@ -101,8 +103,4 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('location/edit/{find}', [LocationController::class, 'edit']);
     Route::put('location/{id}', [LocationController::class, 'update']);
     Route::post('location', [LocationController::class, 'store']);
-
-
-
-
 });
