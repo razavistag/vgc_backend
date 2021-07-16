@@ -155,10 +155,23 @@ class PoController extends Controller
     public function show($po)
     {
         try {
+            $document_type = 'Po';
+
             $objFetch = Po::where('po_number',  'like', '%' . $po . '%')
                 ->orWhere('control_number',  'like', '%' . $po . '%')
                 ->orWhere('completed_by',  'like', '%' . $po . '%')
                 ->orWhere('receiver',  'like', '%' . $po . '%')
+                ->with(
+                    [
+                        "CompletedBy:id,name",
+                        "approvedBy:id,name",
+                        "RequestedBy:id,name",
+                        "Agent:id,agent_name,agent_code",
+                        'Attachment' => function ($q) use ($document_type) {
+                            $q->where('document_name', $document_type);
+                        },
+                    ]
+                )
                 ->limit(10)->get();
             $this->rePhase($objFetch);
 
