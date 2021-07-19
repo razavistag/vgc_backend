@@ -19,8 +19,16 @@ class ReceivinglogenteryController extends Controller
     public function index()
     {
         try {
+            $document_type = 'receivinglogentries';
             $objFetch = Receivinglogentery::orderby('id', 'desc')
-                ->with('Attachment', 'Vendor:id,name')
+                ->with(
+                    [
+                        'Attachment' => function ($q) use ($document_type) {
+                            $q->where('document_name', $document_type);
+                        },
+                        'Vendor:id,name'
+                    ]
+                )
                 ->paginate(20);
             $this->rePhaseToDate($objFetch);
             $this->rePhaseToDevition($objFetch);
@@ -46,12 +54,35 @@ class ReceivinglogenteryController extends Controller
      */
     public function create(Request $request)
     {
+        // $LastID = DB::table('audits')
+        //     ->where(
+        //         [
+        //             ['auditable_type', 'App\Models\Receivinglogentery'],
+        //             ['event', 'created']
+        //         ]
+        //     )
+        //     ->select('auditable_id')
+        //     ->orderBy('id', 'desc')
+        //     ->take(1)
+        //     ->get();
+        // return $LastID[0]->auditable_id;
         DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);
             $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
+            $LastID = DB::table('audits')
+                ->where(
+                    [
+                        ['auditable_type', 'App\Models\Receivinglogentery'],
+                        ['event', 'created']
+                    ]
+                )
+                ->select('auditable_id')
+                ->orderBy('id', 'desc')
+                ->take(1)
+                ->get();
             if ($LastID) {
-                $LastID = $LastID->id;
+                $LastID = $LastID[0]->auditable_id + 1;
             } else {
                 $LastID = 1;
             }

@@ -79,6 +79,11 @@ class CommentController extends Controller
                     'comment' => $user->name . $status . $request->operation . $documentID . ' on ' . date("D Y-m-d h:i:s A", $time),
                 ]
             );
+            DB::commit();
+
+            return response()->json([
+                'comment' => true
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());

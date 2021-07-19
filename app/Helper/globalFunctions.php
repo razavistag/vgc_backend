@@ -32,6 +32,4 @@ function DevelopmentErrorLog($message, $line)
         'status' => 0 // 0 is error not fixed yet
     ]);
     $errorLog->save();
-
-    return 132123;
 }

@@ -13,6 +13,7 @@ class PoSeeder extends Seeder
      */
     public function run()
     {
-        //
+        // CREATE PO
+        \App\Models\Po::factory(1000)->create();
     }
 }

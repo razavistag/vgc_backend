@@ -65,10 +65,12 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);
-            app()->call('App\Http\Controllers\CommentController@store');
+            // app()->call('App\Http\Controllers\CommentController@store');
+            $storeObj =  Order::create($FormObj);
             $OrderID = Order::take('1')->orderby('id', 'desc')->first();
             if ($OrderID) {
-                $OrderID = $OrderID->id + 1;
+                // $OrderID = $OrderID->id + 1;
+                $OrderID = $OrderID->id;
             } else {
                 $OrderID = 1;
             }
@@ -86,13 +88,15 @@ class OrderController extends Controller
                     ]);
                 }
             }
-            $storeObj =  Order::create($FormObj);
+            app()->call('App\Http\Controllers\CommentController@store');
+
+
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'Order created successfully',
-                'data' => $storeObj
+                // 'data' => $storeObj
             ]);
         } catch (\Exception $e) {
             DB::rollBack();

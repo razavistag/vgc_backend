@@ -13,6 +13,7 @@ class ReceivinglogenterySeeder extends Seeder
      */
     public function run()
     {
-        //
+        // CREATE RECEIVING LOG ENTERY
+        \App\Models\Receivinglogentery::factory(1000)->create();
     }
 }

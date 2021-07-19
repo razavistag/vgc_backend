@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ForgetPassword;
+use Illuminate\Support\Str;
+
 use App\Models\Agent;
 use App\Models\Customer;
 use App\Models\Location;
@@ -16,6 +19,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 
 class AuthController extends Controller
@@ -891,6 +895,50 @@ class AuthController extends Controller
         }
     }
 
+    public function forget(Request $request)
+    {
+        $objFetch = User::where('email', $request->email)->first();
+        if ($objFetch != null) {
+            $randomPassword = Str::random(18);
+            $setPassword = bcrypt($randomPassword);
+            $objUser =  User::select('id', 'password', 'name')->where('email', $request->email)->first();
+            User::where('id', $objUser->id)
+                ->update(
+                    [
+                        'password' => $setPassword
+                    ]
+                );
+
+            Mail::send(new ForgetPassword(['object' => $objUser, 'emailTo' => $request->email, 'expireTime' => $request->validate]));
+            return response()->json([
+                'random password' => $randomPassword,
+                'hash password' => $setPassword,
+                'success' => true,
+                'message' => 'EMAIL HAS BEEN SENT TO CHANGE YOUR PASSWORD',
+            ], 200);
+        } else {
+            return response()->json([
+                'success' => false,
+                'message' => 'USER NOT FOUND',
+            ], 200);
+        }
+    }
+
+    public function forgetupdate(Request $request)
+    {
+        $objUser =  User::select('id', 'password', 'name')->where('email', $request->email)->first();
+        User::where('id', $objUser->id)
+            ->update(
+                [
+
+                    'password' =>  bcrypt($request->password)
+                ]
+            );
+        return response()->json([
+            'success' => true,
+            'message' => 'PASSWORD UPDATED',
+        ], 200);
+    }
 
     /**
      * User Login.

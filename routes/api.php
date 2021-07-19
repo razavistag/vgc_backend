@@ -24,6 +24,8 @@ use App\Http\Controllers\ReceivinglogenteryController;
 Route::post('gustRegister', [AuthController::class, 'gustRegister']);
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
+Route::post('forget', [AuthController::class, 'forget']);
+Route::post('forget/update', [AuthController::class, 'forgetupdate']);
 Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
 Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);

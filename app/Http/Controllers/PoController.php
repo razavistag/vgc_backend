@@ -74,11 +74,18 @@ class PoController extends Controller
         DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);
-            app()->call('App\Http\Controllers\CommentController@store');
+            if (isset($FormObj['receiver_default'])) {
+                if ($FormObj['receiver_default'] == 0) {
+                    $FormObj['receiver_auto_id'] = Auth::user()->id;
+                }
+            }
+
+            $storeObj =  Po::create($FormObj);
 
             $poID = Po::take('1')->orderby('id', 'desc')->first();
             if ($poID) {
-                $poID = $poID->id + 1;
+                // $poID = $poID->id + 1;
+                $poID = $poID->id;
             } else {
                 $poID = 1;
             }
@@ -96,13 +103,8 @@ class PoController extends Controller
                     ]);
                 }
             }
-            if (isset($FormObj['receiver_default'])) {
-                if ($FormObj['receiver_default'] == 0) {
-                    $FormObj['receiver_auto_id'] = Auth::user()->id;
-                }
-            }
+            app()->call('App\Http\Controllers\CommentController@store');
 
-            $storeObj =  Po::create($FormObj);
             DB::commit();
 
             return response()->json([
