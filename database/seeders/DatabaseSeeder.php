@@ -23,13 +23,13 @@ class DatabaseSeeder extends Seeder
 
 
         $this->call(AdminUserSeeder::class);
-        // $this->call(UserSeeder::class);
-        // $this->call(VendorSeeder::class);
-        // $this->call(CustomerSeeder::class);
-        // $this->call(AgentSeeder::class);
-        // $this->call(LocationSeeder::class);
-        // $this->call(ReceivinglogenterySeeder::class);
-        // $this->call(PoSeeder::class);
-        // $this->call(OrderSeeder::class);
+        $this->call(UserSeeder::class);
+        $this->call(VendorSeeder::class);
+        $this->call(CustomerSeeder::class);
+        $this->call(AgentSeeder::class);
+        $this->call(LocationSeeder::class);
+        $this->call(ReceivinglogenterySeeder::class);
+        $this->call(PoSeeder::class);
+        $this->call(OrderSeeder::class);
     }
 }

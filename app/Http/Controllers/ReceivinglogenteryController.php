@@ -54,18 +54,6 @@ class ReceivinglogenteryController extends Controller
      */
     public function create(Request $request)
     {
-        // $LastID = DB::table('audits')
-        //     ->where(
-        //         [
-        //             ['auditable_type', 'App\Models\Receivinglogentery'],
-        //             ['event', 'created']
-        //         ]
-        //     )
-        //     ->select('auditable_id')
-        //     ->orderBy('id', 'desc')
-        //     ->take(1)
-        //     ->get();
-        // return $LastID[0]->auditable_id;
         DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);

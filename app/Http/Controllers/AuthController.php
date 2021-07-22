@@ -898,21 +898,22 @@ class AuthController extends Controller
     public function forget(Request $request)
     {
         $objFetch = User::where('email', $request->email)->first();
+
+
         if ($objFetch != null) {
-            $randomPassword = Str::random(18);
+            $randomPassword =  Str::random(180);
             $setPassword = bcrypt($randomPassword);
             $objUser =  User::select('id', 'password', 'name')->where('email', $request->email)->first();
             User::where('id', $objUser->id)
                 ->update(
                     [
-                        'password' => $setPassword
+                        'password' => $randomPassword
                     ]
                 );
-
-            Mail::send(new ForgetPassword(['object' => $objUser, 'emailTo' => $request->email, 'expireTime' => $request->validate]));
+            Mail::send(new ForgetPassword(['object' => $objUser, 'passwordToken' => $randomPassword, 'emailTo' => $request->email, 'expireTime' => $request->validate]));
             return response()->json([
-                'random password' => $randomPassword,
-                'hash password' => $setPassword,
+                // 'random password' => $randomPassword,
+                // 'hash password' => $setPassword,
                 'success' => true,
                 'message' => 'EMAIL HAS BEEN SENT TO CHANGE YOUR PASSWORD',
             ], 200);
@@ -926,18 +927,35 @@ class AuthController extends Controller
 
     public function forgetupdate(Request $request)
     {
-        $objUser =  User::select('id', 'password', 'name')->where('email', $request->email)->first();
-        User::where('id', $objUser->id)
-            ->update(
-                [
+        $objUser =  User::select('id', 'password', 'name')->where(
+            [
+                ['email', $request->email],
+                ['password', $request->fId]
+            ]
+        )->first();
 
-                    'password' =>  bcrypt($request->password)
-                ]
+        if ($objUser) {
+            User::where('id', $objUser->id)
+                ->update(
+                    [
+
+                        'password' =>  bcrypt($request->password)
+                    ]
+                );
+            return response()->json([
+                'success' => true,
+                'message' => 'PASSWORD UPDATED',
+            ], 200);
+        } else {
+
+            return response()->json(
+                [
+                    'success' => false,
+                    'message' => 'YOU CAN NOT CHANGE OTHERS ACCOUNT',
+                ],
+                200
             );
-        return response()->json([
-            'success' => true,
-            'message' => 'PASSWORD UPDATED',
-        ], 200);
+        }
     }
 
     /**
