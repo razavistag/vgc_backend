@@ -68,6 +68,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('order/getOrderList/{find}', [OrderController::class, 'show']);
     Route::get('order/status/{find}', [OrderController::class, 'getStatus']);
     Route::put('order/statusupdate/{id}', [OrderController::class, 'updateStatus']);
+    Route::post('order/filter/', [OrderController::class, 'filter']);
 
     Route::get('po', [PoController::class, 'index']);
     Route::get('po/getPoList/{find}', [PoController::class, 'show']);
@@ -80,6 +81,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('po/attachment/{id}', [PoController::class, 'destroyAttachment']);
     Route::get('po/status/{find}', [PoController::class, 'getStatus']);
     Route::put('po/statusupdate/{id}', [PoController::class, 'updateStatus']);
+    Route::post('po/filter/', [PoController::class, 'filter']);
 
     // COMMENTS ROUTES
     Route::get('comment/{id}', [CommentController::class, 'show']);

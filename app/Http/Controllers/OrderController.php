@@ -160,6 +160,43 @@ class OrderController extends Controller
         }
     }
 
+    public function filter(Request $request)
+    {
+        try {
+
+
+
+        $document_type = 'Order';
+        $objFetch = Order::orderby('id', 'desc')->with(
+            [
+                'Attachment' => function ($q) use ($document_type) {
+                    $q->where('document_name', $document_type);
+                }
+            ]
+        )->whereBetween(
+            'order_date',
+            array($request->startDate, $request->endDate)
+        )->orWhereBetween(
+            'cancel_date',
+            array($request->cancelDate_start, $request->cancelDate_end)
+        )
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'objects' => $objFetch
+        ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
+    }
+
     public function updateStatus(Request $request)
     {
         DB::beginTransaction();

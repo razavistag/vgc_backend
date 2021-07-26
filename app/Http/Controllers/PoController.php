@@ -397,6 +397,50 @@ class PoController extends Controller
         }
     }
 
+
+    public function filter(Request $request)
+    {
+        try {
+
+
+
+            $document_type = 'Po';
+
+            $objFetch = Po::orderby('id', 'desc')->with(
+                [
+                    "CompletedBy:id,name",
+                    "approvedBy:id,name",
+                    "RequestedBy:id,name",
+                    "Agent:id,agent_name,agent_code",
+                    'Attachment' => function ($q) use ($document_type) {
+                        $q->where('document_name', $document_type);
+                    },
+                ]
+            )->whereBetween(
+                'ex_fty_date',
+                array($request->poExCusDate_start, $request->poExCusDate_end)
+            )->orWhereBetween(
+                'po_request_date',
+                array($request->poReDate_start, $request->poReDate_end)
+            )
+                ->get();
+            $this->rePhase($objFetch);
+
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
+    }
+
     public function updateStatus(Request $request)
     {
 
