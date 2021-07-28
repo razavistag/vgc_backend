@@ -24,7 +24,7 @@ class ReceivinglogenteryController extends Controller
                 ->with(
                     [
                         'Attachment' => function ($q) use ($document_type) {
-                            $q->where('document_name', $document_type);
+                            $q->where('document_name', 'receivinglogentries');
                         },
                         'Vendor:id,name'
                     ]
@@ -54,32 +54,40 @@ class ReceivinglogenteryController extends Controller
      */
     public function create(Request $request)
     {
+        // return $request->id_onUpdate;
         DB::beginTransaction();
         try {
-            $FormObj = $this->GetForm($request);
-            $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
-            $LastID = DB::table('audits')
-                ->where(
-                    [
-                        ['auditable_type', 'App\Models\Receivinglogentery'],
-                        ['event', 'created']
-                    ]
-                )
-                ->select('auditable_id')
-                ->orderBy('id', 'desc')
-                ->take(1)
-                ->get();
-            if ($LastID) {
-                $LastID = $LastID[0]->auditable_id + 1;
-            } else {
-                $LastID = 1;
-            }
-            if (isset($FormObj['attachment'])) {
-                // return 1;
-                foreach ($FormObj['attachment'] as $k => $i) {
-                    $now = Carbon::now()->timestamp;
-                    $randomName  = 'RLOGENTRY_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
-                    $i->storeAs('/public/receivinglogentries_attachments', $randomName . $i->getClientOriginalExtension());
+        $FormObj = $this->GetForm($request);
+        // return $FormObj['attachment'];
+        $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
+        // return $LastID;
+        // $LastID = DB::table('audits')
+        //     ->where(
+        //         [
+        //             ['auditable_type', 'App\Models\Receivinglogentery'],
+        //             ['event', 'created']
+        //         ]
+        //     )
+        //     ->select('auditable_id')
+        //     ->orderBy('id', 'desc')
+        //     ->take(1)
+        //     ->get();
+
+        if ($LastID) {
+            // return $LastID;
+            $LastID = $LastID->id + 1;
+            // $LastID = $LastID[0]->auditable_id + 1;
+            // $LastID = 10 + 1;
+        } else {
+            $LastID = 1;
+        }
+        if (isset($FormObj['attachment'])) {
+            // return 1;
+            foreach ($FormObj['attachment'] as $k => $i) {
+                $now = Carbon::now()->timestamp;
+                $randomName  = 'RLOGENTRY_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
+                $i->storeAs('/public/receivinglogentries_attachments', $randomName . $i->getClientOriginalExtension());
+                if ($request->id_onUpdate == 'undefined') {
                     $storeObj =  Attachment::create([
                         'file_name' => $randomName . $i->getClientOriginalExtension(),
                         'file_extention' =>  $i->getClientOriginalExtension(),
@@ -87,15 +95,24 @@ class ReceivinglogenteryController extends Controller
                         'document_auto_id' =>  $LastID,
                         'document_name' =>  'receivinglogentries',
                     ]);
+                } else {
+                    $storeObj =  Attachment::create([
+                        'file_name' => $randomName . $i->getClientOriginalExtension(),
+                        'file_extention' =>  $i->getClientOriginalExtension(),
+                        'file_size' =>  $i->getSize(),
+                        'document_auto_id' =>  $request->id_onUpdate,
+                        'document_name' =>  'receivinglogentries',
+                    ]);
                 }
             }
-            DB::commit();
-            return response()->json([
-                'success' => true,
-                'status' => 200,
-                'message' => 'LOG ENTERY attachment uploaded successfully',
+        }
+        DB::commit();
+        return response()->json([
+            'success' => true,
+            'status' => 200,
+            'message' => 'LOG ENTERY attachment uploaded successfully',
 
-            ]);
+        ]);
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());

@@ -34,6 +34,7 @@ class Receivinglogentery extends Model implements Auditable
         'current_note',
         'status_note',
     ];
+    
 
     public function Attachment()
     {

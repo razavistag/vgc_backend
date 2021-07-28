@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 
-class ReceivinglogenterySeeder extends Seeder
+class OpenOrderSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -13,7 +13,6 @@ class ReceivinglogenterySeeder extends Seeder
      */
     public function run()
     {
-        // CREATE RECEIVING LOG ENTERY
-        \App\Models\Receivinglogentery::factory(10000)->create();
+        //
     }
 }

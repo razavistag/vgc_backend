@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Support\Arr;
 
 class Attachment extends Model implements Auditable
 {
@@ -20,4 +21,19 @@ class Attachment extends Model implements Auditable
         'file_size',
         'note',
     ];
+
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['document_auto_id']);
+
+        return $data;
+    }
+    // public function transformAudit(array $data): array
+    // {
+    //     if (Arr::has($data, 'recode_auto_id.document_auto_id')) {
+    //         $data['recode_auto_id']['document_auto_id'] = 1;
+    //     }
+
+    //     return $data;
+    // }
 }
