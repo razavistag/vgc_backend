@@ -18,6 +18,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LocationController;
+use App\Http\Controllers\OpenOrderController;
 use App\Http\Controllers\PoController;
 use App\Http\Controllers\ReceivinglogenteryController;
 
@@ -107,4 +108,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('location/edit/{find}', [LocationController::class, 'edit']);
     Route::put('location/{id}', [LocationController::class, 'update']);
     Route::post('location', [LocationController::class, 'store']);
+
+    // OPEN ORDER
+    Route::post('openorder', [OpenOrderController::class, 'store']);
+    Route::get('openorder', [OpenOrderController::class, 'index']);
+
+
 });

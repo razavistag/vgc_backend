@@ -152,7 +152,7 @@ class CreateOpenOrdersTable extends Migration
             $table->string('OrderDetailRemarks', 100)->nullable();
             $table->integer('OrderDetailTickets')->nullable();
             $table->integer('OrderDetailWarehouseCode')->nullable();
-            $table->string('OrdePriority', 5)->nullable();
+            $table->string('OrderPriority', 5)->nullable();
             $table->string('OrdeStatus', 5)->nullable();
             $table->string('OrderReference', 50)->nullable();
             $table->string('OrderRemarks', 200)->nullable();
