@@ -451,31 +451,49 @@ class PoController extends Controller
             $objFetch->season = $request->season;
             $objFetch->status = $request->status;
             $objFetch->total_value = $request->total_value;
+
             if ($request->status == 0) {
                 $objFetch->receiver = Auth::user()->name;
                 $objFetch->receiver_auto_id = Auth::user()->id;
-            } elseif ($request->status == 1) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 2) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 3) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 4) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 5) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 6) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 7) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 8) {
-                $objFetch->completed_by = $userID;
-            } elseif ($request->status == 9) {
-                $objFetch->completed_by = $userID;
             }
-            if ($request->completed_by) {
-                $objFetch->completed_by = $request->completed_by;
+            if ($request->status == 2) {
+                $objFetch->completed_by = $userID;
+                // $objFetch->receiver_auto_id = Auth::user()->id;
             }
+            if ($request->status == 7) {
+                $objFetch->approved_by = $userID;
+                // $objFetch->receiver_auto_id = Auth::user()->id;
+            }
+            // if ($request->status == 1) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 2) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 3) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 4) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 5) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 6) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 7) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 8) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->status == 9) {
+            //     $objFetch->completed_by = $userID;
+            // }
+            // if ($request->completed_by) {
+            //     $objFetch->completed_by = $request->completed_by;
+            // }
 
 
             $objFetch->save();
