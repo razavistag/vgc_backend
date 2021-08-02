@@ -401,11 +401,7 @@ class PoController extends Controller
     public function filter(Request $request)
     {
         try {
-
-
-
             $document_type = 'Po';
-
             $objFetch = Po::orderby('id', 'desc')->with(
                 [
                     "CompletedBy:id,name",

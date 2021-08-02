@@ -168,6 +168,7 @@ class OpenOrder extends Model
         'PackPrice',
         'PackingRequiredFor753',
         'PalletName',
+        'OrderStatus',
         'PalletQty',
         'PalletType',
         'PatternNumber',
@@ -226,5 +227,20 @@ class OpenOrder extends Model
         'ordersaleman1',
         'ordersaleman2',
         'ordersaleman3',
+        'subCompany',
+        'program',
+        'Seasons',
+        'newCancelDate',
+        'masterpo',
+        'RoutingDate',
+        'PICKUPAPPTime',
+        'ActualETA',
+        'notes',
+        'PTorSend',
+        'Complete_partial',
+        'Routed',
+        'SHIPPED',
+        'Containerreceived',
+
     ];
 }

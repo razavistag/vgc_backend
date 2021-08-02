@@ -112,6 +112,10 @@ Route::group(['middleware' => 'auth:api'], function () {
     // OPEN ORDER
     Route::post('openorder', [OpenOrderController::class, 'store']);
     Route::get('openorder', [OpenOrderController::class, 'index']);
-
+    Route::get('openorder/majorcompany', [OpenOrderController::class, 'majorCompany']);
+    Route::post('openorder/filter/', [OpenOrderController::class, 'filter']);
+    Route::delete('openorder/{id}', [OpenOrderController::class, 'destroy']);
+    Route::get('openorder/edit/{id}', [OpenOrderController::class, 'show']);
+    Route::put('openorder/{id}', [OpenOrderController::class, 'update']);
 
 });

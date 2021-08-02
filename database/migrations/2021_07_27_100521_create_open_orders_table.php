@@ -237,6 +237,22 @@ class CreateOpenOrdersTable extends Migration
             $table->string('ordersaleman3')->nullable();
             $table->string('flatPack', 15)->nullable();
             $table->string('staff', 100)->nullable();
+            $table->string('OrderStatus', 25)->nullable();
+            $table->string('subCompany', 100)->nullable();
+            $table->text('program')->nullable();
+            $table->string('Seasons', 100)->nullable();
+            $table->string('newCancelDate', 100)->nullable();
+            $table->string('masterpo', 50)->nullable();
+            $table->string('RoutingDate', 50)->nullable();
+            $table->string('PICKUPAPPTime', 50)->nullable();
+            $table->string('ActualETA', 50)->nullable();
+            $table->text('notes')->nullable();
+            $table->string('PTorSend', 5)->nullable();
+            $table->string('Complete_partial', 50)->nullable();
+            $table->string('Routed', 10)->nullable();
+            $table->string('SHIPPED', 10)->nullable();
+            $table->string('Containerreceived', 10)->nullable();
+
             $table->timestamps();
         });
     }
