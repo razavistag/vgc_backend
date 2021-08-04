@@ -33,14 +33,16 @@ class UserFactory extends Factory
             'gender' => 'MALE',
             'status' => 1,
             'access' => json_encode([
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 0 - dashboard
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 1 - order
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 2 - po
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 3 - user
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 4 - receiving log entery
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 5 - location
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 5 - location
-                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3)),    // 6 - openOrder
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 0 - dashboard
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 1 - order
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 2 - po
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 3 - user
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 4 - receiving log entery
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 5 - location
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 5 - location
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 6 - openOrder
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 7 - agent
+                $this->faker->randomElement($array = array(0 => 3, 1 => 3, 2 => 3, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 3)),    // 8 - vendor
             ]),
             'role' => 0,
             'email_verified_at' => now(),

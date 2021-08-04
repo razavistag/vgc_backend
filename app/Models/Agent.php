@@ -15,5 +15,7 @@ class Agent extends Model implements Auditable
         'agent_name',
         'agent_code',
         'agent_email',
+        'agent_mobile',
+        'agent_address',
     ];
 }

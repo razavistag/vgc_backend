@@ -17,7 +17,28 @@ class OpenOrderController extends Controller
     public function index()
     {
         try {
-            $objFetch = OpenOrder::orderby('id', 'desc')->paginate(20);
+            $objFetch = OpenOrder::select(
+                'id',
+                'CompanyCode',
+                'program',
+                'DivisionCode',
+                'controlNumber',
+                'StartDate',
+                'CancelDate',
+                'newCancelDate',
+                'PTorSend',
+                'Complete_partial',
+                'Routed',
+                'SHIPPED',
+                'RoutingDate',
+                'PICKUPAPPTime',
+                'ActualETA',
+                'Containerreceived',
+                'BuyerCode',
+            )->orderby('id', 'desc')
+                ->where('SHIPPED', '!=', 'YES')
+                ->where('controlNumber', '!=', 0)
+                ->paginate(20);
 
 
 
@@ -285,7 +306,7 @@ class OpenOrderController extends Controller
                                 'ordersaleman2' => $value['order saleman2'],
                                 'ordersaleman3' => $value['order saleman3'],
                                 'subCompany' => $value['Sub Company'],
-                                'programs' => $value['Program'],
+                                'program' => $value['Program'],
                                 'Seasons' => $value['Seasons'],
                                 // 'newCancelDate' => $value['New Cancel Date'],
                                 'newCancelDate' => strtotime($value['New Cancel Date']),
@@ -360,7 +381,7 @@ class OpenOrderController extends Controller
                     ->whereBetween(
                         'newCancelDate',
                         array(strtotime($request->newCancelDate_start), strtotime($request->newCancelDate_end))
-                       
+
                     )
                     ->orderby('id', 'desc')->get();
             }
@@ -403,6 +424,7 @@ class OpenOrderController extends Controller
     {
         $objectFind = OpenOrder::orderby('id', 'desc')
             ->select('OrderCustomer')
+            ->where('OrderCustomer', '!=', 'excel2json')
             ->distinct('OrderCustomer')
             ->get();
 

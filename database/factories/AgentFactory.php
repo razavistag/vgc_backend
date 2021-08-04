@@ -25,6 +25,8 @@ class AgentFactory extends Factory
             'agent_name' => $this->faker->firstNameMale,
             'agent_code' => $this->faker->userName(),
             'agent_email' => $this->faker->unique()->safeEmail,
+            'agent_mobile' =>    $this->faker->e164PhoneNumber,
+            'agent_address' =>  $this->faker->address,
         ];
     }
 }

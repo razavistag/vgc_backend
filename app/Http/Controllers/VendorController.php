@@ -14,7 +14,23 @@ class VendorController extends Controller
      */
     public function index()
     {
-        //
+        try {
+
+            $objFetch = Vendor::orderby('id', 'desc')
+                ->paginate(20);
+
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**

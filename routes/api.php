@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AgentController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,8 +48,15 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('user/profileUpdate/{id}', [AuthController::class, 'profileUpdate']);
     Route::put('user/passwordUpdate/{id}', [AuthController::class, 'passwordUpdate']);
     Route::put('user/profileImageUpdate/{id}', [AuthController::class, 'profileImageUpdate']);
-    // Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
-    // Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
+
+    // AGENT ROUTES
+    Route::get('agent',  [AgentController::class, 'index']);
+    Route::get('agent/search/{find}', [AgentController::class, 'show']);
+    Route::delete('agent/{id}', [AgentController::class, 'destroy']);
+    Route::get('agent/edit/{find}', [AgentController::class, 'edit']);
+    Route::put('agent/{id}', [AgentController::class, 'update']);
+    Route::post('agent', [AgentController::class, 'store']);
+
 
 
     // DASHBOARD ROUES
@@ -71,6 +79,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('order/statusupdate/{id}', [OrderController::class, 'updateStatus']);
     Route::post('order/filter/', [OrderController::class, 'filter']);
 
+    // PO ROUTES
     Route::get('po', [PoController::class, 'index']);
     Route::get('po/getPoList/{find}', [PoController::class, 'show']);
     Route::delete('po/{id}', [PoController::class, 'destroy']);
@@ -117,5 +126,4 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('openorder/{id}', [OpenOrderController::class, 'destroy']);
     Route::get('openorder/edit/{id}', [OpenOrderController::class, 'show']);
     Route::put('openorder/{id}', [OpenOrderController::class, 'update']);
-
 });

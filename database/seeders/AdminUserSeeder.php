@@ -34,12 +34,13 @@ class AdminUserSeeder extends Seeder
                 4 => 4,      // 4 - receiving log entery
                 5 => 4,      // 5 - location
                 6 => 4,      // 6 - open order
+                7 => 4,      // 7 - agent
+                8 => 4,      // 8 - vendor
             ]),
             'role' => 1,
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
             'remember_token' => Str::random(10),
-
             'dob' => "1618349802",
             'language' => 1,
             'city' => 1,
