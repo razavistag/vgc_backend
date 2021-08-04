@@ -26,8 +26,8 @@ class VendorFactory extends Factory
             'code' => $this->faker->userName(),
             'contact' => $this->faker->e164PhoneNumber,
             'email' => $this->faker->unique()->safeEmail,
-            'name' => $this->faker->firstNameMale,
-            'agent_auto_id' => $this->faker->numberBetween($min = 1, $max = 50),
+            'name' => $this->faker->name,
+           
         ];
     }
 }

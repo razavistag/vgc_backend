@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Vendor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class VendorController extends Controller
 {
@@ -51,7 +52,26 @@ class VendorController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        DB::beginTransaction();
+        try {
+
+            $storeObj =  Vendor::create($request->all());
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'Vendor created successfully',
+                'data' => $storeObj
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -60,9 +80,28 @@ class VendorController extends Controller
      * @param  \App\Models\Vendor  $vendor
      * @return \Illuminate\Http\Response
      */
-    public function show(Vendor $vendor)
+    public function show($vendor)
     {
-        //
+        try {
+            $objFetch = Vendor::where('name',  'like', '%' . $vendor . '%')
+                ->orWhere('code',  'like', '%' . $vendor . '%')
+                ->orWhere('contact',  'like', '%' . $vendor . '%')
+
+
+                ->limit(10)->get();
+
+
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -71,9 +110,21 @@ class VendorController extends Controller
      * @param  \App\Models\Vendor  $vendor
      * @return \Illuminate\Http\Response
      */
-    public function edit(Vendor $vendor)
+    public function edit($vendor)
     {
-        //
+        try {
+            $objFetch = Vendor::find($vendor);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -83,9 +134,38 @@ class VendorController extends Controller
      * @param  \App\Models\Vendor  $vendor
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Vendor $vendor)
+    public function update(Request $request, $vendor)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $storeObj = Vendor::where('id', $vendor)
+                ->update([
+
+
+
+                    'name' =>  $request->name,
+                    'code' =>  $request->code,
+                    'email' =>  $request->email,
+                    'contact' =>  $request->contact,
+                    'address' =>  $request->address,
+                ]);
+
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'Vendor UPDATED SUCCESSFULLY',
+                'data' => $storeObj,
+
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 
     /**
@@ -94,8 +174,26 @@ class VendorController extends Controller
      * @param  \App\Models\Vendor  $vendor
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Vendor $vendor)
+    public function destroy($vendor)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $obj = Vendor::find($vendor);
+            $obj->delete();
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Vendor Successfully Deleted'
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
     }
 }

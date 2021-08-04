@@ -22,6 +22,7 @@ use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OpenOrderController;
 use App\Http\Controllers\PoController;
 use App\Http\Controllers\ReceivinglogenteryController;
+use App\Http\Controllers\VendorController;
 
 Route::post('gustRegister', [AuthController::class, 'gustRegister']);
 Route::post('register', [AuthController::class, 'register']);
@@ -56,6 +57,14 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('agent/edit/{find}', [AgentController::class, 'edit']);
     Route::put('agent/{id}', [AgentController::class, 'update']);
     Route::post('agent', [AgentController::class, 'store']);
+
+    // Vendor ROUTES
+    Route::get('vendor',  [VendorController::class, 'index']);
+    Route::delete('vendor/{id}', [VendorController::class, 'destroy']);
+    Route::get('vendor/search/{find}', [VendorController::class, 'show']);
+    Route::get('vendor/edit/{find}', [VendorController::class, 'edit']);
+    Route::put('vendor/{id}', [VendorController::class, 'update']);
+    Route::post('vendor', [VendorController::class, 'store']  );
 
 
 

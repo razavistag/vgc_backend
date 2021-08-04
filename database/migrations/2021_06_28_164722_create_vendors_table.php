@@ -20,7 +20,6 @@ class CreateVendorsTable extends Migration
             $table->string('contact')->nullable();
             $table->string('email')->nullable();
             $table->string('name')->nullable();
-            $table->string('agent_auto_id')->nullable();
             $table->timestamps();
         });
     }
