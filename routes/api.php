@@ -23,6 +23,8 @@ use App\Http\Controllers\OpenOrderController;
 use App\Http\Controllers\PoController;
 use App\Http\Controllers\ReceivinglogenteryController;
 use App\Http\Controllers\VendorController;
+use App\Http\Controllers\VendorfactoryController;
+use App\Models\Vendorfactory;
 
 Route::post('gustRegister', [AuthController::class, 'gustRegister']);
 Route::post('register', [AuthController::class, 'register']);
@@ -64,7 +66,18 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('vendor/search/{find}', [VendorController::class, 'show']);
     Route::get('vendor/edit/{find}', [VendorController::class, 'edit']);
     Route::put('vendor/{id}', [VendorController::class, 'update']);
-    Route::post('vendor', [VendorController::class, 'store']  );
+    Route::post('vendor', [VendorController::class, 'store']);
+
+
+    // Factory ROUTES
+    Route::get('factory',  [VendorfactoryController::class, 'index']);
+    Route::delete('factory/{id}', [VendorfactoryController::class, 'destroy']);
+    Route::get('factory/search/{find}', [VendorfactoryController::class, 'show']);
+    Route::get('factory/edit/{find}', [VendorfactoryController::class, 'edit']);
+    Route::put('factory/{id}', [VendorfactoryController::class, 'update']);
+    Route::get('factory/auto_search/{type}/{find}', [VendorfactoryController::class, 'autoComplete']);
+    Route::post('factory', [VendorfactoryController::class, 'store']);
+
 
 
 

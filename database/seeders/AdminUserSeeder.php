@@ -36,6 +36,7 @@ class AdminUserSeeder extends Seeder
                 6 => 4,      // 6 - open order
                 7 => 4,      // 7 - agent
                 8 => 4,      // 8 - vendor
+                9 => 4,      // 9 - Factory
             ]),
             'role' => 1,
             'email_verified_at' => now(),
