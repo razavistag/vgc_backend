@@ -20,6 +20,8 @@ class CreatePosTable extends Migration
             $table->string('vendor_email', '100')->nullable();
             $table->string('vendor_code', '10')->nullable();
 
+            $table->integer('factory_auto_id')->nullable();
+
             $table->integer('agent_auto_id')->nullable();
             $table->string('agent', '100')->nullable();
             $table->string('agent_email', '100')->nullable();

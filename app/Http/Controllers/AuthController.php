@@ -564,33 +564,33 @@ class AuthController extends Controller
                 );
             }
             // VENDOR
-            if ($FormObj['user_type'] == 2) {
-                $getLastID = User::take('1')->orderby('id', 'desc')->first();
-                Vendor::create(
-                    [
-                        'address' => $FormObj['name'],
-                        'code' => 'VE/' . $getLastID['id'],
-                        'contact' => $FormObj['phone'],
-                        'email' => $FormObj['email'],
-                        'name' => $FormObj['name'],
-                        'agent_auto_id' => $getLastID['id'],
-                    ]
-                );
-            }
+            // if ($FormObj['user_type'] == 2) {
+            //     $getLastID = User::take('1')->orderby('id', 'desc')->first();
+            //     Vendor::create(
+            //         [
+            //             'address' => $FormObj['name'],
+            //             'code' => 'VE/' . $getLastID['id'],
+            //             'contact' => $FormObj['phone'],
+            //             'email' => $FormObj['email'],
+            //             'name' => $FormObj['name'],
+            //             'agent_auto_id' => $getLastID['id'],
+            //         ]
+            //     );
+            // }
 
 
             // AGENT / SUPPLIER
-            if ($FormObj['user_type'] == 3) {
-                $getLastID = User::take('1')->orderby('id', 'desc')->first();
-                Agent::create(
-                    [
-                        'agent_name' => $FormObj['name'],
-                        'agent_code' => 'AG/' . $getLastID['id'],
-                        'agent_email' => $FormObj['email'],
+            // if ($FormObj['user_type'] == 3) {
+            //     $getLastID = User::take('1')->orderby('id', 'desc')->first();
+            //     Agent::create(
+            //         [
+            //             'agent_name' => $FormObj['name'],
+            //             'agent_code' => 'AG/' . $getLastID['id'],
+            //             'agent_email' => $FormObj['email'],
 
-                    ]
-                );
-            }
+            //         ]
+            //     );
+            // }
 
             $FormObj['password'] = bcrypt($FormObj['password']);
             $FormObj['access'] = json_encode($FormObj['access']);

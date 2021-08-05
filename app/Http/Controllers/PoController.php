@@ -7,6 +7,7 @@ use App\Models\Attachment;
 use App\Models\Customer;
 use App\Models\Po;
 use App\Models\Vendor;
+use App\Models\Vendorfactory;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,6 +32,7 @@ class PoController extends Controller
                         "approvedBy:id,name",
                         "RequestedBy:id,name",
                         "Agent:id,agent_name,agent_code",
+                        "VendorFactory",
                         'Attachment' => function ($q) use ($document_type) {
                             $q->where('document_name', $document_type);
                         },
@@ -169,6 +171,7 @@ class PoController extends Controller
                         "approvedBy:id,name",
                         "RequestedBy:id,name",
                         "Agent:id,agent_name,agent_code",
+                        "Vendorfactory",
                         'Attachment' => function ($q) use ($document_type) {
                             $q->where('document_name', $document_type);
                         },
@@ -191,46 +194,60 @@ class PoController extends Controller
     }
     public function autoComplete($type, $find)
     {
-        try {
-            if ($type == 'agent') {
-                $objectFind = Agent::orderby('id', 'desc')
-                    ->where(
-                        'agent_name',
-                        'like',
-                        '%' . $find . '%',
+        // try {
+        if ($type == 'agent') {
+            $objectFind = Agent::orderby('id', 'desc')
+                ->where(
+                    'agent_name',
+                    'like',
+                    '%' . $find . '%',
 
-                    )->limit(8)->get();
-            }
-            if ($type == 'vendor') {
-                $objectFind = Vendor::orderby('id', 'desc')
-                    ->where(
-                        'name',
-                        'like',
-                        '%' . $find . '%',
-
-                    )->limit(8)->get();
-            }
-            if ($type == 'customer') {
-                $objectFind = Customer::orderby('id', 'desc')
-                    ->where(
-                        'name',
-                        'like',
-                        '%' . $find . '%',
-
-                    )->limit(8)->get();
-            }
-
-            return response()->json([
-                'success' => true,
-                'object' => $objectFind
-            ], 200);
-        } catch (\Exception $e) {
-            DevelopmentErrorLog($e->getMessage(), $e->getLine());
-            return response()->json([
-                'success' => false,
-                'message' => 'PLEASE TRY AGAIN LATER',
-            ], 500);
+                )->limit(8)->get();
         }
+        if ($type == 'vendor') {
+            $objectFind = VendorFactory::orderby('id', 'desc')
+                ->where(
+                    [
+                        [
+                            'factory_name',
+                            'like',
+                            '%' . $find . '%',
+                        ],
+                        [
+                            'vendor_name',
+                            'like',
+                            '%' . $find . '%',
+                        ],
+                    ]
+                )
+                // ->orWhere(
+                //     'vendor_name',
+                //     'like',
+                //     '%' . $find . '%',
+                // )
+                ->limit(8)->get();
+        }
+        if ($type == 'customer') {
+            $objectFind = Customer::orderby('id', 'desc')
+                ->where(
+                    'name',
+                    'like',
+                    '%' . $find . '%',
+
+                )->limit(8)->get();
+        }
+
+        return response()->json([
+            'success' => true,
+            'object' => $objectFind
+        ], 200);
+        // } catch (\Exception $e) {
+        //     DevelopmentErrorLog($e->getMessage(), $e->getLine());
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'PLEASE TRY AGAIN LATER',
+        //     ], 500);
+        // }
     }
     /**
      * Show the form for editing the specified resource.
@@ -247,6 +264,7 @@ class PoController extends Controller
                     'Customer:id,name,email',
                     'Vendor:id,name,email,code',
                     'Agent',
+                    "Vendorfactory",
                     'Attachment' => function ($q) use ($document_type) {
                         $q->where('document_name', $document_type);
                     }
@@ -603,6 +621,7 @@ class PoController extends Controller
                 'hanger_cost' => ['bail'],
                 "operation" => ['bail'],
                 "receiver_default" => ['bail'],
+                "factory_auto_id" => ['bail'],
             ],
         );
     }

@@ -35,6 +35,7 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
 Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
 
+
 Route::group(['middleware' => 'auth:api'], function () {
 
     // USER ROUTES

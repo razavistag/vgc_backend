@@ -13,52 +13,53 @@ class Po extends Model implements Auditable
 
 
     protected $fillable = [
-        'status', //--------
-        'cus_po_number', //--------
-        'po_number', //--------
-        'style', //--------
-        'customer', //--------
-        'customer_email',  //--------
-        'agent', //--------
-        'agent_email', //--------
-        'agent_code', //--------
-        'receiver', //--------
-        'receiver_email', //--------
-        'priority', //--------
-        'customer_auto_id', //--------
-        'agent_auto_id',    //--------
-        'receiver_auto_id', //--------
+        'status',
+        'cus_po_number',
+        'po_number',
+        'style',
+        'customer',
+        'customer_email',
+        'agent',
+        'agent_email',
+        'agent_code',
+        'receiver',
+        'receiver_email',
+        'priority',
+        'customer_auto_id',
+        'agent_auto_id',
+        'receiver_auto_id',
         'company_auto_id',
-        'company', //--------
-        'number_of_style', //--------
-        'qty', //--------
-        'total_value', //--------
-        'attachment_auto_id', //--------
-        'control_number', //--------
-        'po_request_date', //--------
-        'po_date', //--------
-        'house_date', //--------
-        'cancel_date', //--------
-        'ex_fty_date', //--------
-        'vendor', //--------
-        'vendor_email', //--------
-        'vendor_code', //--------
-        'beneficiary', //--------
-        'payment_term', //--------
-        'load_port', //--------
-        'port_of_entry', //--------
-        'ship_via', //--------
-        'hanger', //--------
-        'instruction', //--------
-        'cost_type', //--------
-        'warehouse', //--------
-        'vendor_auto_id', //--------
-        'hanger_cost', //--------
-        'season', //--------
+        'company',
+        'number_of_style',
+        'qty',
+        'total_value',
+        'attachment_auto_id',
+        'control_number',
+        'po_request_date',
+        'po_date',
+        'house_date',
+        'cancel_date',
+        'ex_fty_date',
+        'vendor',
+        'vendor_email',
+        'vendor_code',
+        'beneficiary',
+        'payment_term',
+        'load_port',
+        'port_of_entry',
+        'ship_via',
+        'hanger',
+        'instruction',
+        'cost_type',
+        'warehouse',
+        'vendor_auto_id',
+        'hanger_cost',
+        'season',
         'po_subject',
-        'completed_by', //--------
-        'completed_by_email', //--------
-        'approved_by', //--------
+        'completed_by',
+        'completed_by_email',
+        'approved_by',
+        'factory_auto_id',
     ];
 
 
@@ -90,5 +91,9 @@ class Po extends Model implements Auditable
     public function RequestedBy()
     {
         return $this->hasOne(User::class, 'id', 'receiver_auto_id');
+    }
+    public function Vendorfactory()
+    {
+        return $this->hasOne(Vendorfactory::class, 'id', 'factory_auto_id');
     }
 }

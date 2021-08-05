@@ -73,6 +73,7 @@ class PoFactory extends Factory
             'ship_via'  => $this->faker->numberBetween($min = 1, $max = 6),
             'cost_type'  => $this->faker->numberBetween($min = 1, $max = 6),
             'warehouse'  => $this->faker->numberBetween($min = 1, $max = 6),
+            'factory_auto_id'  => $this->faker->numberBetween($min = 1, $max = 6),
 
             // 'payment_term'  => $this->faker->randomElement([
             //     'S03 : NET 45',
