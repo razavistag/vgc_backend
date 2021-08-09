@@ -86,20 +86,6 @@ class OrderController extends Controller
                     ]);
                 }
             }
-            // if ($request->operation == 'ORDER#') {
-            //     // echo 'order';
-            //     $status = ' Received this ';
-            //     $documentID =  Order::take('1')->orderby('id', 'desc')->first();
-
-            //     if ($documentID) {
-            //         return  $documentID->id . ' true part';
-            //         $documentID = 1;
-            //     } else {
-            //         $documentID = $documentID->id + 1;
-            //         return
-            //             $documentID->id . ' false part';
-            //     }
-            // }
 
             app()->call('App\Http\Controllers\CommentController@store');
 
@@ -176,9 +162,6 @@ class OrderController extends Controller
     public function filter(Request $request)
     {
         try {
-
-
-
             $document_type = 'Order';
             $objFetch = Order::orderby('id', 'desc')->with(
                 [
@@ -243,7 +226,6 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
-
             return response()->json([
                 'success' => false,
                 'message' => 'PLEASE TRY AGAIN LATER',
@@ -381,7 +363,6 @@ class OrderController extends Controller
                 ]
             )->find($order);
 
-
             return response()->json([
                 'success' => true,
                 'objects' => $objFetch
@@ -405,15 +386,11 @@ class OrderController extends Controller
     public function update(Request $request,  $order)
     {
         DB::beginTransaction();
-
         try {
             $FormObj = $this->GetForm($request);
             if (isset($FormObj['attachment'])) {
                 if (isset($FormObj['attachment'][0])) {
-
                     $checkExsist = substr($FormObj['attachment'][0], 0, 5);
-                    // return  $checkExsist;
-
                     if ($checkExsist != 'Order') {
                         foreach ($FormObj['attachment'] as $k => $i) {
                             $now = Carbon::now()->timestamp;
@@ -430,12 +407,10 @@ class OrderController extends Controller
                     }
                 }
             }
-
             unset($FormObj['attachment']);
             unset($FormObj['operation']);
             $storeObj = Order::where('id', $order)
                 ->update($FormObj);
-
             DB::commit();
             return response()->json([
                 'success' => true,

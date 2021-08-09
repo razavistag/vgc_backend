@@ -9,6 +9,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class User extends Authenticatable implements Auditable
 {
@@ -77,6 +78,7 @@ class User extends Authenticatable implements Auditable
     public function transformAudit(array $data): array
     {
         Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+        Arr::set($data, 'user_name',  Auth::user()->name);
 
         return $data;
     }
@@ -85,7 +87,7 @@ class User extends Authenticatable implements Auditable
     {
         return $this->hasMany(Location::class, 'id', 'city');
     }
-    
+
     public function AdditionalInformation()
     {
         return $this->hasMany(UserInformation::class, 'user_id', 'id');

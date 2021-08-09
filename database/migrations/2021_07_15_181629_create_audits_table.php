@@ -17,6 +17,7 @@ class CreateAuditsTable extends Migration
             $table->bigIncrements('id');
             $table->string('user_type')->nullable();
             $table->unsignedBigInteger('user_id')->nullable();
+            $table->text('user_name')->nullable();
             $table->string('event');
             $table->morphs('auditable');
             $table->text('recode_auto_id')->nullable();

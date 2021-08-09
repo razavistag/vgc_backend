@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 
 class Attachment extends Model implements Auditable
 {
@@ -25,6 +26,7 @@ class Attachment extends Model implements Auditable
     public function transformAudit(array $data): array
     {
         Arr::set($data, 'recode_auto_id',  $this->attributes['document_auto_id']);
+        Arr::set($data, 'user_name',  Auth::user()->name);
 
         return $data;
     }

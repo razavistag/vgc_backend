@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Arr;
 
 class Order extends Model implements Auditable
@@ -55,6 +55,7 @@ class Order extends Model implements Auditable
     public function transformAudit(array $data): array
     {
         Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+        Arr::set($data, 'user_name',  Auth::user()->name);
 
         return $data;
     }
