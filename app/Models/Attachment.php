@@ -28,12 +28,5 @@ class Attachment extends Model implements Auditable
 
         return $data;
     }
-    // public function transformAudit(array $data): array
-    // {
-    //     if (Arr::has($data, 'recode_auto_id.document_auto_id')) {
-    //         $data['recode_auto_id']['document_auto_id'] = 1;
-    //     }
 
-    //     return $data;
-    // }
 }

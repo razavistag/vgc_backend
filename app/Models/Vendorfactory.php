@@ -4,10 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Support\Arr;
 
-class Vendorfactory extends Model
+class Vendorfactory extends Model implements Auditable
 {
     use HasFactory;
+    use \OwenIt\Auditing\Auditable;
 
     protected $fillable = [
         'factory_name',
@@ -18,6 +21,12 @@ class Vendorfactory extends Model
         'vendor_auto_id',
         'vendor_name'
     ];
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+
+        return $data;
+    }
 
     public function user()
     {

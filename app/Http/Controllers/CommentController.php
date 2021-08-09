@@ -40,23 +40,27 @@ class CommentController extends Controller
      */
     public function store(Request $request)
     {
+
         DB::beginTransaction();
         try {
             if ($request->operation == 'ORDER#') {
+
                 $status = ' Received this ';
+                $type_id = 0;
                 $documentID =  Order::take('1')->orderby('id', 'desc')->first();
-                if ($documentID) {
-                    $documentID = $documentID->id + 1;
+                if ($documentID->id != 1) {
+                    $documentID = $documentID->id;
                 } else {
                     $documentID = 1;
                 }
             }
 
             if ($request->operation == 'PO#') {
+                $type_id = 1;
                 $status = ' Requested this  ';
                 $documentID =  Po::take('1')->orderby('id', 'desc')->first();
-                if ($documentID) {
-                    $documentID = $documentID->id + 1;
+                if ($documentID->id != 1) {
+                    $documentID = $documentID->id;
                 } else {
                     $documentID = 1;
                 }
@@ -67,7 +71,7 @@ class CommentController extends Controller
 
             $storeObj =  Comment::create(
                 [
-                    'type_id' => 0,
+                    'type_id' => $type_id,
                     'document_id' => $documentID,
                     'document_status' => $request->status,
                     'hrm_auto_id' => $user->id,
@@ -153,11 +157,17 @@ class CommentController extends Controller
      * @param  \App\Models\Comment  $comment
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, $type)
     {
         try {
+            if ($type == 'po') {
+                $type_id = 1;
+            } else {
+                $type_id = 0;
+            }
             $objects = Comment::with('user:id,name,profilePic')
                 ->where('document_id', $id)
+                ->where('type_id', $type_id)
                 ->orderBy('id', 'desc')
                 ->limit(6)->get();
             $objects->each(function ($item, $key) {

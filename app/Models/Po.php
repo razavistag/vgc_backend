@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Support\Arr;
 
 class Po extends Model implements Auditable
 {
@@ -63,6 +64,12 @@ class Po extends Model implements Auditable
     ];
 
 
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+
+        return $data;
+    }
 
     public function Customer()
     {

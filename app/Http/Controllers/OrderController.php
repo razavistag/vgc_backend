@@ -65,11 +65,9 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             $FormObj = $this->GetForm($request);
-            // app()->call('App\Http\Controllers\CommentController@store');
             $storeObj =  Order::create($FormObj);
             $OrderID = Order::take('1')->orderby('id', 'desc')->first();
             if ($OrderID) {
-                // $OrderID = $OrderID->id + 1;
                 $OrderID = $OrderID->id;
             } else {
                 $OrderID = 1;
@@ -88,6 +86,21 @@ class OrderController extends Controller
                     ]);
                 }
             }
+            // if ($request->operation == 'ORDER#') {
+            //     // echo 'order';
+            //     $status = ' Received this ';
+            //     $documentID =  Order::take('1')->orderby('id', 'desc')->first();
+
+            //     if ($documentID) {
+            //         return  $documentID->id . ' true part';
+            //         $documentID = 1;
+            //     } else {
+            //         $documentID = $documentID->id + 1;
+            //         return
+            //             $documentID->id . ' false part';
+            //     }
+            // }
+
             app()->call('App\Http\Controllers\CommentController@store');
 
 
@@ -166,26 +179,26 @@ class OrderController extends Controller
 
 
 
-        $document_type = 'Order';
-        $objFetch = Order::orderby('id', 'desc')->with(
-            [
-                'Attachment' => function ($q) use ($document_type) {
-                    $q->where('document_name', $document_type);
-                }
-            ]
-        )->whereBetween(
-            'order_date',
-            array($request->startDate, $request->endDate)
-        )->orWhereBetween(
-            'cancel_date',
-            array($request->cancelDate_start, $request->cancelDate_end)
-        )
-            ->get();
+            $document_type = 'Order';
+            $objFetch = Order::orderby('id', 'desc')->with(
+                [
+                    'Attachment' => function ($q) use ($document_type) {
+                        $q->where('document_name', $document_type);
+                    }
+                ]
+            )->whereBetween(
+                'order_date',
+                array($request->startDate, $request->endDate)
+            )->orWhereBetween(
+                'cancel_date',
+                array($request->cancelDate_start, $request->cancelDate_end)
+            )
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'objects' => $objFetch
-        ], 200);
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());

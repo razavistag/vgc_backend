@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Support\Arr;
 
 class Comment extends Model implements Auditable
 {
@@ -23,6 +24,13 @@ class Comment extends Model implements Auditable
         'is_send_email', //email sent or not
         'current_time', //executedTime
     ];
+
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['document_id']);
+
+        return $data;
+    }
 
     public function user()
     {

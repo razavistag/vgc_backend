@@ -24,9 +24,9 @@ class DatabaseSeeder extends Seeder
         $this->call(CustomerSeeder::class);
         $this->call(AgentSeeder::class);
         $this->call(LocationSeeder::class);
-        $this->call(ReceivinglogenterySeeder::class);
-        $this->call(PoSeeder::class);
-        $this->call(OrderSeeder::class);
+        // $this->call(ReceivinglogenterySeeder::class);
+        // $this->call(PoSeeder::class);
+        // $this->call(OrderSeeder::class);
         $this->call(VendorfactorySeeder::class);
     }
 }

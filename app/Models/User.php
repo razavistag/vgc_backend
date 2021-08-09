@@ -8,13 +8,14 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
 use OwenIt\Auditing\Contracts\Auditable;
+use Illuminate\Support\Arr;
 
 class User extends Authenticatable implements Auditable
 {
     use HasApiTokens, HasFactory, Notifiable;
     use \OwenIt\Auditing\Auditable;
 
-     
+
     /**
      * The attributes that are mass assignable.
      *
@@ -72,10 +73,19 @@ class User extends Authenticatable implements Auditable
     protected $casts = [
         'email_verified_at' => 'datetime',
     ];
+
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+
+        return $data;
+    }
+
     public function City()
     {
         return $this->hasMany(Location::class, 'id', 'city');
     }
+    
     public function AdditionalInformation()
     {
         return $this->hasMany(UserInformation::class, 'user_id', 'id');

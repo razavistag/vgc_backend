@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
 
+use Illuminate\Support\Arr;
+
 class Order extends Model implements Auditable
 {
     use \OwenIt\Auditing\Auditable;
@@ -48,6 +50,14 @@ class Order extends Model implements Auditable
         're_style',                 // -> re_style
         'eta',                      // -> date only
     ];
+
+
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+
+        return $data;
+    }
 
     public function Attachment()
     {

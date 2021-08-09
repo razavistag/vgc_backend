@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BugController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LocationController;
@@ -35,6 +36,11 @@ Route::get('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 Route::get('user/get_city_autocomplete/{find}', [AuthController::class, 'get_ac_city_additional']);
 Route::get('user/get_ac_country_additional/{find}', [AuthController::class, 'get_ac_country_additional']);
 
+// BUG CAPTURE ROUTES
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('bug_capture', [BugController::class, 'store']);
+    Route::get('bug_capture', [BugController::class, 'index']);
+});
 
 Route::group(['middleware' => 'auth:api'], function () {
 
@@ -80,8 +86,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('factory', [VendorfactoryController::class, 'store']);
 
 
-
-
     // DASHBOARD ROUES
     Route::get('dashboard/statment', [AuthController::class, 'dashboardStatment']);
     Route::get('dashboard/orderStatment', [AuthController::class, 'orderStatment']);
@@ -117,7 +121,7 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::post('po/filter/', [PoController::class, 'filter']);
 
     // COMMENTS ROUTES
-    Route::get('comment/{id}', [CommentController::class, 'show']);
+    Route::get('comment/{id}/{type}', [CommentController::class, 'show']);
     Route::post('comment', [CommentController::class, 'sendMessage']);
     Route::put('comment/mark_read/{id}', [CommentController::class, 'mark_read']);
 
