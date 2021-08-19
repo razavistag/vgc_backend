@@ -171,23 +171,33 @@ class VendorfactoryController extends Controller
     {
         DB::beginTransaction();
         try {
-            $storeObj = Vendorfactory::where('id', $vendorfactory)
-                ->update([
-                    'factory_name' =>  $request->factory_name,
-                    'factory_code' =>  $request->factory_code,
-                    'factory_mobile' =>  $request->factory_mobile,
-                    'factory_email' =>  $request->factory_email,
-                    'factory_address' =>  $request->factory_address,
-                    'vendor_auto_id' =>  $request->vendor_auto_id,
-                    'vendor_name' =>  $request->vendor_name,
-                ]);
+            $obj = Vendorfactory::find($vendorfactory);
+            $obj['factory_name'] =  $request->factory_name;
+            $obj['factory_code'] =  $request->factory_code;
+            $obj['factory_mobile'] =  $request->factory_mobile;
+            $obj['factory_email'] =  $request->factory_email;
+            $obj['factory_address'] =  $request->factory_address;
+            $obj['vendor_auto_id'] =  $request->vendor_auto_id;
+            $obj['vendor_name'] =  $request->vendor_name;
+            $obj->save();
+
+            // $storeObj = Vendorfactory::where('id', $vendorfactory)
+            //     ->update([
+            //         'factory_name' =>  $request->factory_name,
+            //         'factory_code' =>  $request->factory_code,
+            //         'factory_mobile' =>  $request->factory_mobile,
+            //         'factory_email' =>  $request->factory_email,
+            //         'factory_address' =>  $request->factory_address,
+            //         'vendor_auto_id' =>  $request->vendor_auto_id,
+            //         'vendor_name' =>  $request->vendor_name,
+            //     ]);
 
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'FACTORY UPDATED SUCCESSFULLY',
-                'data' => $storeObj,
+                'data' => $obj,
 
             ]);
         } catch (\Exception $e) {

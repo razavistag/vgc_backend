@@ -233,6 +233,8 @@ class OrderController extends Controller
         }
     }
 
+
+
     public function getAttachments($task)
     {
         try {
@@ -409,14 +411,53 @@ class OrderController extends Controller
             }
             unset($FormObj['attachment']);
             unset($FormObj['operation']);
-            $storeObj = Order::where('id', $order)
-                ->update($FormObj);
+            // $storeObj = Order::where('id', $order)
+            //     ->update($FormObj);
+
+            $obj = Order::find($order);
+            $obj['order_date'] =  $request->order_date;
+            $obj['cancel_date'] =  $request->cancel_date;
+            $obj['comment'] =  $request->comment;
+            $obj['remark'] =  $request->remark;
+            $obj['customer_auto_id'] =  $request->customer_auto_id;
+            $obj['customer'] =  $request->customer;
+            $obj['customer_email'] =  $request->customer_email;
+            $obj['sales_rep_auto_id'] =  $request->sales_rep_auto_id;
+            $obj['sales_rep'] =  $request->sales_rep;
+            $obj['sales_rep_email'] =  $request->sales_rep_email;
+            $obj['po_number'] =  $request->po_number;
+            $obj['factor_number'] =  $request->factor_number;
+            $obj['receiver'] =  $request->receiver;
+            $obj['receiver_email'] =  $request->receiver_email;
+            $obj['completed_by'] =  $request->completed_by;
+            $obj['completed_by_email'] =  $request->completed_by_email;
+            $obj['approved_by'] =  $request->approved_by;
+            $obj['num_page'] =  $request->num_page;
+            $obj['production_by'] =  $request->production_by;
+            $obj['production_auto_id'] =  $request->production_auto_id;
+            $obj['production_email'] =  $request->production_email;
+            $obj['company_auto_id'] =  $request->company_auto_id;
+            $obj['control_number'] =  $request->control_number;
+            $obj['number_of_style'] =  $request->number_of_style;
+            $obj['receiver_auto_id'] =  $request->receiver_auto_id;
+            $obj['status'] =  $request->status;
+            $obj['order_type'] =  $request->order_type;
+            $obj['is_immediate'] =  $request->is_immediate;
+            $obj['edi_status'] =  $request->edi_status;
+            $obj['upc_status'] =  $request->upc_status;
+            $obj['price_ticket'] =  $request->price_ticket;
+            $obj['total_value'] =  $request->total_value;
+            $obj['or_style'] =  $request->or_style;
+            $obj['re_style'] =  $request->re_style;
+            $obj['eta'] =  $request->eta;
+            $obj->save();
+
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'Order UPDATED successfully',
-                'data' => $storeObj,
+                'data' => $obj,
                 'req' => $FormObj
             ]);
         } catch (\Exception $e) {

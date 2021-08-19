@@ -252,6 +252,7 @@ class CreateOpenOrdersTable extends Migration
             $table->string('Routed', 10)->nullable();
             $table->string('SHIPPED', 10)->nullable();
             $table->string('Containerreceived', 10)->nullable();
+            $table->string('style', 100)->nullable();
 
             $table->timestamps();
         });

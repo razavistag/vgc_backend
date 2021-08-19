@@ -57,62 +57,62 @@ class ReceivinglogenteryController extends Controller
         // return $request->id_onUpdate;
         DB::beginTransaction();
         try {
-        $FormObj = $this->GetForm($request);
-        // return $FormObj['attachment'];
-        $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
-        // return $LastID;
-        // $LastID = DB::table('audits')
-        //     ->where(
-        //         [
-        //             ['auditable_type', 'App\Models\Receivinglogentery'],
-        //             ['event', 'created']
-        //         ]
-        //     )
-        //     ->select('auditable_id')
-        //     ->orderBy('id', 'desc')
-        //     ->take(1)
-        //     ->get();
-
-        if ($LastID) {
+            $FormObj = $this->GetForm($request);
+            // return $FormObj['attachment'];
+            $LastID = Receivinglogentery::take('1')->orderby('id', 'desc')->first();
             // return $LastID;
-            $LastID = $LastID->id + 1;
-            // $LastID = $LastID[0]->auditable_id + 1;
-            // $LastID = 10 + 1;
-        } else {
-            $LastID = 1;
-        }
-        if (isset($FormObj['attachment'])) {
-            // return 1;
-            foreach ($FormObj['attachment'] as $k => $i) {
-                $now = Carbon::now()->timestamp;
-                $randomName  = 'RLOGENTRY_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
-                $i->storeAs('/public/receivinglogentries_attachments', $randomName . $i->getClientOriginalExtension());
-                if ($request->id_onUpdate == 'undefined') {
-                    $storeObj =  Attachment::create([
-                        'file_name' => $randomName . $i->getClientOriginalExtension(),
-                        'file_extention' =>  $i->getClientOriginalExtension(),
-                        'file_size' =>  $i->getSize(),
-                        'document_auto_id' =>  $LastID,
-                        'document_name' =>  'receivinglogentries',
-                    ]);
-                } else {
-                    $storeObj =  Attachment::create([
-                        'file_name' => $randomName . $i->getClientOriginalExtension(),
-                        'file_extention' =>  $i->getClientOriginalExtension(),
-                        'file_size' =>  $i->getSize(),
-                        'document_auto_id' =>  $request->id_onUpdate,
-                        'document_name' =>  'receivinglogentries',
-                    ]);
+            // $LastID = DB::table('audits')
+            //     ->where(
+            //         [
+            //             ['auditable_type', 'App\Models\Receivinglogentery'],
+            //             ['event', 'created']
+            //         ]
+            //     )
+            //     ->select('auditable_id')
+            //     ->orderBy('id', 'desc')
+            //     ->take(1)
+            //     ->get();
+
+            if ($LastID) {
+                // return $LastID;
+                $LastID = $LastID->id + 1;
+                // $LastID = $LastID[0]->auditable_id + 1;
+                // $LastID = 10 + 1;
+            } else {
+                $LastID = 1;
+            }
+            if (isset($FormObj['attachment'])) {
+                // return 1;
+                foreach ($FormObj['attachment'] as $k => $i) {
+                    $now = Carbon::now()->timestamp;
+                    $randomName  = 'RLOGENTRY_' . rand(10, 1000) . '_' . $now . '_' . rand(10, 1000) . '.';
+                    $i->storeAs('/public/receivinglogentries_attachments', $randomName . $i->getClientOriginalExtension());
+                    if ($request->id_onUpdate == 'undefined') {
+                        $storeObj =  Attachment::create([
+                            'file_name' => $randomName . $i->getClientOriginalExtension(),
+                            'file_extention' =>  $i->getClientOriginalExtension(),
+                            'file_size' =>  $i->getSize(),
+                            'document_auto_id' =>  $LastID,
+                            'document_name' =>  'receivinglogentries',
+                        ]);
+                    } else {
+                        $storeObj =  Attachment::create([
+                            'file_name' => $randomName . $i->getClientOriginalExtension(),
+                            'file_extention' =>  $i->getClientOriginalExtension(),
+                            'file_size' =>  $i->getSize(),
+                            'document_auto_id' =>  $request->id_onUpdate,
+                            'document_name' =>  'receivinglogentries',
+                        ]);
+                    }
                 }
             }
-        }
-        DB::commit();
-        return response()->json([
-            'success' => true,
-            'status' => 200,
-            'message' => 'LOG ENTERY attachment uploaded successfully',
+            DB::commit();
+            return response()->json([
+                'success' => true,
+                'status' => 200,
+                'message' => 'LOG ENTERY attachment uploaded successfully',
 
-        ]);
+            ]);
         } catch (\Exception $e) {
             DB::rollBack();
             DevelopmentErrorLog($e->getMessage(), $e->getLine());
@@ -233,15 +233,39 @@ class ReceivinglogenteryController extends Controller
         try {
             $FormObj = $this->GetForm($request);
 
-            $storeObj = Receivinglogentery::where('id', $receivinglogentery)
-                ->update($FormObj);
+            $obj = Receivinglogentery::find($receivinglogentery);
+            $obj['division'] =  $FormObj['division'];
+            $obj['vendor'] =  $FormObj['vendor'];
+            $obj['amt_shipment'] =   $FormObj['amt_shipment'];
+            $obj['container'] =  $FormObj['container'];
+            $obj['po'] =  $FormObj['po'];
+            $obj['etd_date'] =   $FormObj['etd_date'];
+            $obj['eta_date'] =  $FormObj['eta_date'];
+            $obj['est_eta_war_date'] =  $FormObj['est_eta_war_date'];
+            $obj['actual_eta_war_date'] =  $FormObj['actual_eta_war_date'];
+            $obj['tally_date'] =  $FormObj['tally_date'];
+            $obj['sys_rec_date'] =   $FormObj['sys_rec_date'];
+            $obj['appointment_no'] =   $FormObj['appointment_no'];
+            $obj['trucker'] =  $FormObj['trucker'];
+            $obj['carton'] =  $FormObj['carton'];
+            $obj['wh_charge'] =   $FormObj['wh_charge'];
+            $obj['miss'] =   $FormObj['miss'];
+            $obj['pcs'] =  $FormObj['pcs'];
+            $obj['status'] =  $FormObj['status'];
+            $obj['current_note'] =  $FormObj['current_note'];
+            $obj['status_note'] =   $FormObj['status_note'];
+            $obj->save();
+
+
+            // $storeObj = Receivinglogentery::where('id', $receivinglogentery)
+            //     ->update($FormObj);
 
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'LOG ENTRY UPDATED SUCCESSFULLY',
-                'data' => $storeObj,
+                'data' => $obj,
                 'req' => $FormObj
             ]);
         } catch (\Exception $e) {

@@ -138,21 +138,29 @@ class VendorController extends Controller
     {
         DB::beginTransaction();
         try {
-            $storeObj = Vendor::where('id', $vendor)
-                ->update([
-                    'name' =>  $request->name,
-                    'code' =>  $request->code,
-                    'email' =>  $request->email,
-                    'contact' =>  $request->contact,
-                    'address' =>  $request->address,
-                ]);
+            $obj = Vendor::find($vendor);
+            $obj['name'] = $request->name;
+            $obj['code'] = $request->code;
+            $obj['email'] = $request->email;
+            $obj['contact'] = $request->contact;
+            $obj['address'] = $request->address;
+            $obj->save();
+
+            // $storeObj = Vendor::where('id', $vendor)
+            //     ->update([
+            //         'name' =>  $request->name,
+            //         'code' =>  $request->code,
+            //         'email' =>  $request->email,
+            //         'contact' =>  $request->contact,
+            //         'address' =>  $request->address,
+            //     ]);
 
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'Vendor UPDATED SUCCESSFULLY',
-                'data' => $storeObj,
+                'data' => $obj,
 
             ]);
         } catch (\Exception $e) {

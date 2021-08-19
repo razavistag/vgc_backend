@@ -141,24 +141,35 @@ class LocationController extends Controller
         try {
             $FormObj = $this->GetForm($request);
 
-            $storeObj = Location::where('id', $location)
-                ->update([
-                    'location_name' =>  $FormObj["location_name"],
-                    'location_address' =>  $FormObj["location_address"],
-                    'location_city' =>  $FormObj["location_city"],
-                    'location_zip_code' =>  $FormObj["location_zip_code"],
-                    'location_country' =>  $FormObj["location_country"],
-                    'location_phone' =>  $FormObj["location_phone"],
-                    'location_phone' =>  $FormObj["location_phone"],
-                    'location_status' =>  $FormObj["location_status"],
-                ]);
+
+            $obj = Location::find($location);
+            $obj['location_name'] =   $FormObj["location_name"];
+            $obj['location_address'] =   $FormObj["location_address"];
+            $obj['location_city'] =  $FormObj["location_city"];
+            $obj['location_zip_code'] =   $FormObj["location_zip_code"];
+            $obj['location_country'] =   $FormObj["location_country"];
+            $obj['location_phone'] =  $FormObj["location_phone"];
+            $obj['location_status'] =   $FormObj["location_status"];
+            $obj->save();
+            
+            // $storeObj = Location::where('id', $location)
+            //     ->update([
+            //         'location_name' =>  $FormObj["location_name"],
+            //         'location_address' =>  $FormObj["location_address"],
+            //         'location_city' =>  $FormObj["location_city"],
+            //         'location_zip_code' =>  $FormObj["location_zip_code"],
+            //         'location_country' =>  $FormObj["location_country"],
+            //         'location_phone' =>  $FormObj["location_phone"],
+            //         'location_phone' =>  $FormObj["location_phone"],
+            //         'location_status' =>  $FormObj["location_status"],
+            //     ]);
 
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'LOCATION UPDATED SUCCESSFULLY',
-                'data' => $storeObj,
+                'data' => $obj,
                 'req' => $FormObj
             ]);
         } catch (\Exception $e) {

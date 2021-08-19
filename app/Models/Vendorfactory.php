@@ -21,10 +21,6 @@ class Vendorfactory extends Model implements Auditable
         'vendor_auto_id',
         'vendor_name'
     ];
-
-    // protected $auditInclude  = [
-    //     'factory_name', 'factory_code', 'factory_mobile', 'updated_at'
-    // ];
     public function transformAudit(array $data): array
     {
         Arr::set($data, 'recode_auto_id',  $this->attributes['id']);

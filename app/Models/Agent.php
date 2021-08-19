@@ -12,15 +12,16 @@ class Agent extends Model implements Auditable
 {
     use HasFactory;
     use \OwenIt\Auditing\Auditable;
-    protected $guarded = [];
 
-    protected $fillable = [
-        'agent_name',
-        'agent_code',
-        'agent_email',
-        'agent_mobile',
-        'agent_address',
-    ];
+
+    // protected $fillable = [
+    //     'agent_name',
+    //     'agent_code',
+    //     'agent_email',
+    //     'agent_mobile',
+    //     'agent_address',
+    // ];
+    protected $guarded = [];
 
     public function transformAudit(array $data): array
     {

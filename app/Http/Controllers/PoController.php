@@ -320,14 +320,63 @@ class PoController extends Controller
             }
             unset($FormObj['attachment']);
             unset($FormObj['operation']);
-            $storeObj = Po::where('id', $po)
-                ->update($FormObj);
+            // $storeObj = Po::where('id', $po)
+            //     ->update($FormObj);
+            $obj = Po::find($po);
+            $obj['status'] =  $FormObj['status'];
+            $obj['cus_po_number'] =  $FormObj['cus_po_number'];
+            $obj['po_number'] =  $FormObj['po_number'];
+            $obj['style'] =  $FormObj['style'];
+            $obj['customer'] =  $FormObj['customer'];
+            $obj['customer_email'] =  $FormObj['customer_email'];
+            $obj['agent'] =  $FormObj['agent'];
+            $obj['agent_email'] =  $FormObj['agent_email'];
+            $obj['agent_code'] =  $FormObj['agent_code'];
+            $obj['receiver'] =  $FormObj['receiver'];
+            $obj['receiver_email'] =  $FormObj['receiver_email'];
+            $obj['priority'] =  $FormObj['priority'];
+            $obj['customer_auto_id'] =  $FormObj['customer_auto_id'];
+            $obj['agent_auto_id'] =  $FormObj['agent_auto_id'];
+            $obj['receiver_auto_id'] =  $FormObj['receiver_auto_id'];
+            // $obj['company_auto_id'] =  $FormObj['company_auto_id'];
+            $obj['company'] =  $FormObj['company'];
+            $obj['number_of_style'] =  $FormObj['number_of_style'];
+            $obj['qty'] =  $FormObj['qty'];
+            $obj['total_value'] =  $FormObj['total_value'];
+            // $obj['attachment_auto_id'] =  $FormObj['attachment_auto_id'];
+            $obj['control_number'] =  $FormObj['control_number'];
+            $obj['po_request_date'] =  $FormObj['po_request_date'];
+            $obj['po_date'] =  $FormObj['po_date'];
+            $obj['house_date'] =  $FormObj['house_date'];
+            $obj['cancel_date'] =  $FormObj['cancel_date'];
+            $obj['ex_fty_date'] =  $FormObj['ex_fty_date'];
+            $obj['vendor'] =  $FormObj['vendor'];
+            $obj['vendor_email'] =  $FormObj['vendor_email'];
+            $obj['vendor_code'] =  $FormObj['vendor_code'];
+            $obj['beneficiary'] =  $FormObj['beneficiary'];
+            $obj['payment_term'] =  $FormObj['payment_term'];
+            $obj['load_port'] =  $FormObj['load_port'];
+            $obj['port_of_entry'] =  $FormObj['port_of_entry'];
+            $obj['ship_via'] =  $FormObj['ship_via'];
+            $obj['hanger'] =  $FormObj['hanger'];
+            $obj['instruction'] =  $FormObj['instruction'];
+            $obj['cost_type'] =  $FormObj['cost_type'];
+            $obj['warehouse'] =  $FormObj['warehouse'];
+            $obj['vendor_auto_id'] =  $FormObj['vendor_auto_id'];
+            $obj['hanger_cost'] =  $FormObj['hanger_cost'];
+            // $obj['season'] =  $FormObj['season'];
+            // $obj['po_subject'] =  $FormObj['po_subject'];
+            // $obj['completed_by'] =  $FormObj['completed_by'];
+            // $obj['completed_by_email'] =  $FormObj['completed_by_email'];
+            // $obj['approved_by'] =  $FormObj['approved_by'];
+            $obj['factory_auto_id'] =  $FormObj['factory_auto_id'];
+            $obj->save();
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'Order UPDATED successfully',
-                'data' => $storeObj,
+                'data' => $obj,
                 'req' => $FormObj
             ]);
         } catch (\Exception $e) {

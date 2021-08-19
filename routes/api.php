@@ -25,6 +25,7 @@ use App\Http\Controllers\PoController;
 use App\Http\Controllers\ReceivinglogenteryController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VendorfactoryController;
+use App\Models\OpenOrder;
 use App\Models\Vendorfactory;
 
 Route::post('gustRegister', [AuthController::class, 'gustRegister']);
@@ -153,4 +154,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('openorder/{id}', [OpenOrderController::class, 'destroy']);
     Route::get('openorder/edit/{id}', [OpenOrderController::class, 'show']);
     Route::put('openorder/{id}', [OpenOrderController::class, 'update']);
+    Route::post('openorder/style/', [OpenOrderController::class, 'styleCheckUpdate']);
 });

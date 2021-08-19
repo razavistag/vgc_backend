@@ -138,21 +138,29 @@ class AgentController extends Controller
     {
         DB::beginTransaction();
         try {
-            $storeObj = Agent::where('id', $agent)
-                ->update([
-                    'agent_name' =>  $request->agent_name,
-                    'agent_code' =>  $request->agent_code,
-                    'agent_email' =>  $request->agent_email,
-                    'agent_mobile' =>  $request->agent_mobile,
-                    'agent_address' =>  $request->agent_address,
-                ]);
+            $obj = Agent::find($agent);
+            $obj['agent_name'] =  $request->agent_name;
+            $obj['agent_code'] = $request->agent_code;
+            $obj['agent_email'] = $request->agent_email;
+            $obj['agent_mobile'] = $request->agent_mobile;
+            $obj['agent_address'] = $request->agent_address;
+            $obj->save();
+            // $storeObj = Agent::where('id', $agent)
+            //     ->update([
+            //         'agent_name' =>  $request->agent_name,
+            //         'agent_code' =>  $request->agent_code,
+            //         'agent_email' =>  $request->agent_email,
+            //         'agent_mobile' =>  $request->agent_mobile,
+            //         'agent_address' =>  $request->agent_address,
+            //     ]);
 
             DB::commit();
             return response()->json([
                 'success' => true,
                 'status' => 200,
                 'message' => 'AGENT UPDATED SUCCESSFULLY',
-                'data' => $storeObj,
+                // 'data' => $storeObj,
+                'data' => $obj,
 
             ]);
         } catch (\Exception $e) {

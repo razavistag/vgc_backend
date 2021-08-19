@@ -5,7 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use OwenIt\Auditing\Contracts\Auditable;
-
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Arr;
 class Location extends Model implements Auditable
 {
     use HasFactory;
@@ -20,6 +21,13 @@ class Location extends Model implements Auditable
         'location_phone',
         'location_status',
     ];
+    public function transformAudit(array $data): array
+    {
+        Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+        Arr::set($data, 'user_name',  Auth::user()->name);
+
+        return $data;
+    }
 
     public function city()
     {

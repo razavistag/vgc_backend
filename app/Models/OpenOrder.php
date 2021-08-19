@@ -245,7 +245,7 @@ class OpenOrder extends Model implements Auditable
         'Routed',
         'SHIPPED',
         'Containerreceived',
-
+        'style'
     ];
 
 

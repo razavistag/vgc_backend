@@ -350,12 +350,13 @@ class OpenOrderController extends Controller
 
         try {
 
-
+            // filter companies
             if ($request->majorCompanies != '' && $request->cancelDate_start == '' && $request->startDate_start == '' && $request->newCancelDate_start == '') {
                 $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
                     ->orderby('id', 'desc')->get();
             }
 
+            // filter start date
             if ($request->startDate_start != '') {
                 $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
                     ->whereBetween(
@@ -365,6 +366,7 @@ class OpenOrderController extends Controller
                     ->orderby('id', 'desc')->get();
             }
 
+            // filter cancel date
             if ($request->cancelDate_start != '' && $request->startDate_start == '') {
 
                 $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
@@ -375,8 +377,8 @@ class OpenOrderController extends Controller
                     ->orderby('id', 'desc')->get();
             }
 
+            // filter new cancel date
             if ($request->newCancelDate_start != '' && $request->cancelDate_start == '' && $request->startDate_start == '') {
-                // return 'new cancel date';
                 $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
                     ->whereBetween(
                         'newCancelDate',
@@ -386,6 +388,7 @@ class OpenOrderController extends Controller
                     ->orderby('id', 'desc')->get();
             }
 
+            // filter cancel date, start date, new cancel date
             if ($request->cancelDate_start != '' && $request->startDate_start != '' && $request->newCancelDate_start != '') {
                 $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
                     ->whereBetween(
@@ -472,6 +475,27 @@ class OpenOrderController extends Controller
         ]);
     }
 
+    /**
+     * updating styles on open order table
+     * if style of open order data and shipment data
+     * are matched we update the style value of the shipment data
+     * into open order column on open order table
+     */
+    public function styleCheckUpdate(Request $request)
+    {
+        $requestObject = $request->objectRequest;
+        foreach ($requestObject  as $key => $value) {
+            $checkStyle = OpenOrder::where('ItemNumber', $value['Item'])
+                ->update([
+                    'style' => $value['Item']
+                ]);
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Shipment styles updated',
+            'objects' => $requestObject
+        ], 200);
+    }
     /**
      * Show the form for editing the specified resource.
      *
