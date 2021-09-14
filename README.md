@@ -4,7 +4,7 @@ Deployment
 >     -- assign DB
 >     -- assign email configuration
 
-- componser install
+- composer install
 - generate an app key 
 > $ php artisan key:generate
 
