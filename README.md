@@ -37,3 +37,26 @@ Note
 
 innodb_strict_mode = OFF in ->sql my.ini for solve
 
+
+
+```
+__________________________________________________________________________________
+```
+
+### public_html
+	- .htaccess
+	- favicon.icon
+	- index.php
+	- robot.txt
+	- web.config
+### vgc_backend
+	-app
+	-bootsrap
+	......
+	-.env
+	
+add path to index.php inside the public_html
+
+    require __DIR__.'/../vgc_backend/vendor/autoload.php';
+    $app = require_once __DIR__.'/../vgc_backend/bootstrap/app.php';
+
