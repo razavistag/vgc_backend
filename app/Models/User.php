@@ -77,8 +77,15 @@ class User extends Authenticatable implements Auditable
 
     public function transformAudit(array $data): array
     {
-        Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
-        Arr::set($data, 'user_name',  Auth::user()->name);
+        if (isset(Auth::user()->id)) {
+            Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+            Arr::set($data, 'user_name',  Auth::user()->name);
+        } else {
+            Arr::set($data, 'recode_auto_id',  00);
+            Arr::set($data, 'user_name',  'GUST');
+        }
+        // Arr::set($data, 'recode_auto_id',  $this->attributes['id']);
+        // Arr::set($data, 'user_name',  Auth::user()->name);
 
         return $data;
     }
