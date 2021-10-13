@@ -154,5 +154,5 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::delete('openorder/{id}', [OpenOrderController::class, 'destroy']);
     Route::get('openorder/edit/{id}', [OpenOrderController::class, 'show']);
     Route::put('openorder/{id}', [OpenOrderController::class, 'update']);
-    Route::post('openorder/style/', [OpenOrderController::class, 'styleCheckUpdate']);
+    Route::post('openorder/stylecheck/', [OpenOrderController::class, 'styleCheckUpdate']);
 });
