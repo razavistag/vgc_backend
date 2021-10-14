@@ -19,6 +19,7 @@ class OpenOrderController extends Controller
         try {
             $objFetch = OpenOrder::select(
                 'id',
+                'OrderCustomer',
                 'CompanyCode',
                 'program',
                 'DivisionCode',
