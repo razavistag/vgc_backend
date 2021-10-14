@@ -481,7 +481,7 @@ class OpenOrderController extends Controller
      * are matched we update the style value of the shipment data
      * into open order column on open order table
      */
-    public function styleCheckUpdate(Request $request)
+    public function styleCheckUpdate($id,Request $request)
     {
         $requestObject = $request->objectRequest;
         foreach ($requestObject  as $key => $value) {

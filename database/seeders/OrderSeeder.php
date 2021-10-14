@@ -15,7 +15,7 @@ class OrderSeeder extends Seeder
     public function run()
     {
         // CREATE ORDER
-        \App\Models\Order::factory(1000)->state(new Sequence(
+        \App\Models\Order::factory(100)->state(new Sequence(
             ['status' => '0'],  // Received
             ['status' => '1'],  // Working
             ['status' => '2'],  // Completed

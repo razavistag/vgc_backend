@@ -14,6 +14,6 @@ class ReceivinglogenterySeeder extends Seeder
     public function run()
     {
         // CREATE RECEIVING LOG ENTERY
-        \App\Models\Receivinglogentery::factory(10000)->create();
+        \App\Models\Receivinglogentery::factory(100)->create();
     }
 }
