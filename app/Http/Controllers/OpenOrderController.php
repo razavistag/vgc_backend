@@ -17,13 +17,15 @@ class OpenOrderController extends Controller
     public function index()
     {
         try {
-            $objFetch = OpenOrder::select(
-                'id',
-                'OrderCustomer',
-                'CompanyCode',
+            $objFetch = OpenOrder::select( 
+                'id', 
                 'program',
-                'DivisionCode',
                 'controlNumber',
+                'CustomerName',
+                'OrderDetailCustomerPurchaseOrderNumber',
+                'masterpo',
+                'TotalQuantityOrdered',
+                'style',
                 'StartDate',
                 'CancelDate',
                 'newCancelDate',
@@ -33,9 +35,16 @@ class OpenOrderController extends Controller
                 'SHIPPED',
                 'RoutingDate',
                 'PICKUPAPPTime',
+                'InHouseDate',
                 'ActualETA',
+                // FPO AND shipment 
+                // Container
                 'Containerreceived',
-                'BuyerCode',
+                // WBCT DATE
+                'notes',
+                // buyer NAME 
+                // OTHER NOTE 
+                // PROGRAM @ 
             )->orderby('id', 'desc')
                 ->where('SHIPPED', '!=', 'YES')
                 ->where('controlNumber', '!=', 0)
