@@ -75,6 +75,173 @@ class OpenOrderController extends Controller
         //
     }
 
+    public function masterSearch(Request $request){
+
+        try {
+            $objFetch = OpenOrder::select( 
+                'id', 
+                'program',
+                'controlNumber',
+                'CustomerName',
+                'OrderDetailCustomerPurchaseOrderNumber',
+                'masterpo',
+                'TotalQuantityOrdered',
+                'style',
+                'StartDate',
+                'CancelDate',
+                'newCancelDate',
+                'PTorSend',
+                'Complete_partial',
+                'Routed',
+                'SHIPPED',
+                'RoutingDate',
+                'PICKUPAPPTime',
+                'InHouseDate',
+                'ActualETA',
+                // FPO AND shipment 
+                // Container
+                'Containerreceived',
+                // WBCT DATE
+                'notes',
+                // buyer NAME 
+                // OTHER NOTE 
+                // PROGRAM @ 
+            ) 
+            ->where('controlNumber', '!=', 0)
+            ->where('SHIPPED', '!=', 'YES')
+            ->where('program',  'like', '%' . $request->search. '%')
+            ->orWhere('style',  'like', '%' . $request->search. '%')
+            ->orWhere('controlNumber',  'like', '%' . $request->search. '%')
+            ->orWhere('CustomerName',  'like', '%' . $request->search. '%')
+            ->orWhere('OrderDetailCustomerPurchaseOrderNumber',  'like', '%' . $request->search. '%')
+            ->orWhere('masterpo',  'like', '%' . $request->search. '%')
+            ->orWhere('TotalQuantityOrdered',  'like', '%' . $request->search. '%')
+            ->orWhere('Complete_partial',  'like', '%' . $request->search. '%')
+            ->orWhere('PTorSend',  'like', '%' . $request->search. '%')
+            ->orWhere('SHIPPED',  'like', '%' . $request->search. '%')
+            ->get();
+
+
+
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+            ], 500);
+        }
+    }
+
+    public function sortasc(Request $request){
+        try {
+            $objFetch = OpenOrder::select( 
+                'id', 
+                'program',
+                'controlNumber',
+                'CustomerName',
+                'OrderDetailCustomerPurchaseOrderNumber',
+                'masterpo',
+                'TotalQuantityOrdered',
+                'style',
+                'StartDate',
+                'CancelDate',
+                'newCancelDate',
+                'PTorSend',
+                'Complete_partial',
+                'Routed',
+                'SHIPPED',
+                'RoutingDate',
+                'PICKUPAPPTime',
+                'InHouseDate',
+                'ActualETA',
+                // FPO AND shipment 
+                // Container
+                'Containerreceived',
+                // WBCT DATE
+                'notes',
+                // buyer NAME 
+                // OTHER NOTE 
+                // PROGRAM @ 
+             )->orderby($request->sort, 'asc')
+                ->where('SHIPPED', '!=', 'YES')
+                ->where('controlNumber', '!=', 0)
+                ->get();
+
+
+
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+        } catch (\Exception $e) {
+            DevelopmentErrorLog($e->getMessage(), $e->getLine());
+            return response()->json([
+                'success' => false,
+                'message' => 'PLEASE TRY AGAIN LATER',
+                'e' => $e,
+            ], 500);
+        }
+    }
+
+    public function sorting(Request $request){
+       
+        
+            $sortOrder = $request->sortOrder;
+             if ($sortOrder == true) {
+               return $sortOrder = 'asc';
+             }else{
+                return $sortOrder = 'desc';
+             }
+
+           
+
+            $objFetch = OpenOrder::select( 
+                'id', 
+                'program',
+                'controlNumber',
+                'CustomerName',
+                'OrderDetailCustomerPurchaseOrderNumber',
+                'masterpo',
+                'TotalQuantityOrdered',
+                'style',
+                'StartDate',
+                'CancelDate',
+                'newCancelDate',
+                'PTorSend',
+                'Complete_partial',
+                'Routed',
+                'SHIPPED',
+                'RoutingDate',
+                'PICKUPAPPTime',
+                'InHouseDate',
+                'ActualETA',
+                // FPO AND shipment 
+                // Container
+                'Containerreceived',
+                // WBCT DATE
+                'notes',
+                // buyer NAME 
+                // OTHER NOTE 
+                // PROGRAM @ 
+             )->orderby($request->sortValue,  $sortOrder)
+                ->where('SHIPPED', '!=', 'YES')
+                ->where('controlNumber', '!=', 0)
+                ->get();
+
+
+
+            return response()->json([
+                'success' => true,
+                'objects' => $objFetch
+            ], 200);
+       
+       
+    }
+
     /**
      * Store a newly created resource in storage.
      *
