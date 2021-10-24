@@ -48,8 +48,8 @@ class OpenOrderController extends Controller
             )->orderby('id', 'desc')
                 ->where('SHIPPED', '!=', 'YES')
                 ->where('controlNumber', '!=', 0)
-                ->get();
-                // ->paginate(20);
+                // ->get();
+                ->paginate(20);
 
 
 
@@ -139,11 +139,16 @@ class OpenOrderController extends Controller
 
     public function sorting(Request $request){
 
+        // if ($request->itemsPerPage == -1) {
+        //     return 'all';
+        //    } else {
+        //        return $request->itemsPerPage;
+        //    }
     //  return $request->sortDesc;
        if (isset($request->sortBy)) {
 
-     
-        
+   
+   
 
         $objFetch = OpenOrder::select(
                        'id', 
@@ -175,7 +180,9 @@ class OpenOrderController extends Controller
         //         // PROGRAM @ 
         )
                 ->orderby('id', $request->sortDesc) 
-                ->get();
+                ->where('SHIPPED', '!=', 'YES')
+                ->where('controlNumber', '!=', 0)
+                ->paginate(20);
           
                 // return ['sortby'=>$request->sortBy[0], 'asc/desc'=>$request->sortDesc[0]];
                 // down desc true
