@@ -48,7 +48,8 @@ class OpenOrderController extends Controller
             )->orderby('id', 'desc')
                 ->where('SHIPPED', '!=', 'YES')
                 ->where('controlNumber', '!=', 0)
-                ->paginate(20);
+                ->get();
+                // ->paginate(20);
 
 
 
@@ -136,71 +137,16 @@ class OpenOrderController extends Controller
         }
     }
 
-    public function sortasc(Request $request){
-        try {
-            $objFetch = OpenOrder::select( 
-                'id', 
-                'program',
-                'controlNumber',
-                'CustomerName',
-                'OrderDetailCustomerPurchaseOrderNumber',
-                'masterpo',
-                'TotalQuantityOrdered',
-                'style',
-                'StartDate',
-                'CancelDate',
-                'newCancelDate',
-                'PTorSend',
-                'Complete_partial',
-                'Routed',
-                'SHIPPED',
-                'RoutingDate',
-                'PICKUPAPPTime',
-                'InHouseDate',
-                'ActualETA',
-                // FPO AND shipment 
-                // Container
-                'Containerreceived',
-                // WBCT DATE
-                'notes',
-                // buyer NAME 
-                // OTHER NOTE 
-                // PROGRAM @ 
-             )->orderby($request->sort, 'asc')
-                ->where('SHIPPED', '!=', 'YES')
-                ->where('controlNumber', '!=', 0)
-                ->get();
-
-
-
-            return response()->json([
-                'success' => true,
-                'objects' => $objFetch
-            ], 200);
-        } catch (\Exception $e) {
-            DevelopmentErrorLog($e->getMessage(), $e->getLine());
-            return response()->json([
-                'success' => false,
-                'message' => 'PLEASE TRY AGAIN LATER',
-                'e' => $e,
-            ], 500);
-        }
-    }
-
     public function sorting(Request $request){
-       
+
+    //  return $request->sortDesc;
+       if (isset($request->sortBy)) {
+
+     
         
-            $sortOrder = $request->sortOrder;
-             if ($sortOrder == true) {
-               return $sortOrder = 'asc';
-             }else{
-                return $sortOrder = 'desc';
-             }
 
-           
-
-            $objFetch = OpenOrder::select( 
-                'id', 
+        $objFetch = OpenOrder::select(
+                       'id', 
                 'program',
                 'controlNumber',
                 'CustomerName',
@@ -219,28 +165,88 @@ class OpenOrderController extends Controller
                 'PICKUPAPPTime',
                 'InHouseDate',
                 'ActualETA',
-                // FPO AND shipment 
-                // Container
+        //         // FPO AND shipment 
+        //         // Container
                 'Containerreceived',
-                // WBCT DATE
+        //         // WBCT DATE
                 'notes',
-                // buyer NAME 
-                // OTHER NOTE 
-                // PROGRAM @ 
-             )->orderby($request->sortValue,  $sortOrder)
-                ->where('SHIPPED', '!=', 'YES')
-                ->where('controlNumber', '!=', 0)
+        //         // buyer NAME 
+        //         // OTHER NOTE 
+        //         // PROGRAM @ 
+        )
+                ->orderby('id', $request->sortDesc) 
                 ->get();
-
-
-
-            return response()->json([
+          
+                // return ['sortby'=>$request->sortBy[0], 'asc/desc'=>$request->sortDesc[0]];
+                // down desc true
+                // up asc false
+       return response()->json([
                 'success' => true,
-                'objects' => $objFetch
+                'objects' => $objFetch,
+                'sortby'=>$request->sortBy[0],
+                'asc/desc'=>$request->sortDesc[0],
+              
+
             ], 200);
+        
+       } else {
+            // return 'index';
+        return  $this->index();
+     
+       }
        
+        // try {
        
+        //     $objFetch = OpenOrder::select( 
+        //         'id', 
+        //         'program',
+        //         'controlNumber',
+        //         'CustomerName',
+        //         'OrderDetailCustomerPurchaseOrderNumber',
+        //         'masterpo',
+        //         'TotalQuantityOrdered',
+        //         'style',
+        //         'StartDate',
+        //         'CancelDate',
+        //         'newCancelDate',
+        //         'PTorSend',
+        //         'Complete_partial',
+        //         'Routed',
+        //         'SHIPPED',
+        //         'RoutingDate',
+        //         'PICKUPAPPTime',
+        //         'InHouseDate',
+        //         'ActualETA',
+        //         // FPO AND shipment 
+        //         // Container
+        //         'Containerreceived',
+        //         // WBCT DATE
+        //         'notes',
+        //         // buyer NAME 
+        //         // OTHER NOTE 
+        //         // PROGRAM @ 
+        //      )->orderby($request->sortBy[0], 'asc')
+        //         ->where('SHIPPED', '!=', 'YES')
+        //         ->where('controlNumber', '!=', 0)
+        //         ->get();
+
+
+
+        //     return response()->json([
+        //         'success' => true,
+        //         'objects' => $objFetch
+        //     ], 200);
+        // } catch (\Exception $e) {
+        //     DevelopmentErrorLog($e->getMessage(), $e->getLine());
+        //     return response()->json([
+        //         'success' => false,
+        //         'message' => 'PLEASE TRY AGAIN LATER',
+        //         'e' => $e,
+        //     ], 500);
+        // }
     }
+
+  
 
     /**
      * Store a newly created resource in storage.
