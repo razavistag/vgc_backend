@@ -157,5 +157,6 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::put('openorder/stylecheck/{id}', [OpenOrderController::class, 'styleCheckUpdate']);
     Route::get('openorder/mastersearch/', [OpenOrderController::class, 'masterSearch']);
     Route::get('openorder/sorting/', [OpenOrderController::class, 'sorting']);
+    Route::get('openorder/datatable/', [OpenOrderController::class, 'datatable']);
     
 });
