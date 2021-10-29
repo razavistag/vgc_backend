@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\OpenOrder;
+use App\Models\OpenorderImportTemp;
+use App\Models\ShipmentImportTemp;
 use GrahamCampbell\ResultType\Success;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +19,8 @@ class OpenOrderController extends Controller
     public function index()
     {
         try {
-            $objFetch = OpenOrder::select( 
-                'id', 
+            $objFetch = OpenOrder::select(
+                'id',
                 'program',
                 'controlNumber',
                 'CustomerName',
@@ -47,7 +49,7 @@ class OpenOrderController extends Controller
                 // PROGRAM @ 
             )->orderby('id', 'desc')
                 ->where('SHIPPED', '!=', 'YES')
-                ->where('controlNumber', '!=', 0)
+                // ->where('controlNumber', '!=', 0)
                 // ->get();
                 ->paginate(20);
 
@@ -76,15 +78,15 @@ class OpenOrderController extends Controller
         //
     }
 
-    public function masterSearch(Request $request){
+    public function masterSearch(Request $request)
+    {
 
         try {
-            $objFetch = OpenOrder::select( 
-                'id', 
+            $objFetch = OpenOrder::select(
+                'id',
                 'program',
                 'controlNumber',
                 'CustomerName',
-                'OrderDetailCustomerPurchaseOrderNumber',
                 'masterpo',
                 'TotalQuantityOrdered',
                 'style',
@@ -103,24 +105,25 @@ class OpenOrderController extends Controller
                 // Container
                 'Containerreceived',
                 // WBCT DATE
-                'notes',
+                'note1',
+                'note2',
                 // buyer NAME 
                 // OTHER NOTE 
                 // PROGRAM @ 
-            ) 
-            ->where('controlNumber', '!=', 0)
-            ->where('SHIPPED', '!=', 'YES')
-            ->where('program',  'like', '%' . $request->search. '%')
-            ->orWhere('style',  'like', '%' . $request->search. '%')
-            ->orWhere('controlNumber',  'like', '%' . $request->search. '%')
-            ->orWhere('CustomerName',  'like', '%' . $request->search. '%')
-            ->orWhere('OrderDetailCustomerPurchaseOrderNumber',  'like', '%' . $request->search. '%')
-            ->orWhere('masterpo',  'like', '%' . $request->search. '%')
-            ->orWhere('TotalQuantityOrdered',  'like', '%' . $request->search. '%')
-            ->orWhere('Complete_partial',  'like', '%' . $request->search. '%')
-            ->orWhere('PTorSend',  'like', '%' . $request->search. '%')
-            ->orWhere('SHIPPED',  'like', '%' . $request->search. '%')
-            ->get();
+            )
+                ->where('controlNumber', '!=', 0)
+                ->where('SHIPPED', '!=', 'YES')
+                ->where('program',  'like', '%' . $request->search . '%')
+                ->orWhere('style',  'like', '%' . $request->search . '%')
+                ->orWhere('controlNumber',  'like', '%' . $request->search . '%')
+                ->orWhere('CustomerName',  'like', '%' . $request->search . '%')
+
+                ->orWhere('masterpo',  'like', '%' . $request->search . '%')
+                ->orWhere('TotalQuantityOrdered',  'like', '%' . $request->search . '%')
+                ->orWhere('Complete_partial',  'like', '%' . $request->search . '%')
+                ->orWhere('PTorSend',  'like', '%' . $request->search . '%')
+                ->orWhere('SHIPPED',  'like', '%' . $request->search . '%')
+                ->get();
 
 
 
@@ -133,19 +136,22 @@ class OpenOrderController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'PLEASE TRY AGAIN LATER',
+                'e' => $e,
             ], 500);
         }
     }
 
-    public function datatable(Request $request){
+    public function datatable(Request $request)
+    {
         $objFetch = OpenOrder::select(
-            'id', 
+            'id',
             'program',
             'controlNumber',
             'CustomerName',
-            'OrderDetailCustomerPurchaseOrderNumber',
+            // 'OrderDetailCustomerPurchaseOrderNumber',
             'masterpo',
             'TotalQuantityOrdered',
+            'OpenOrderQty',
             'style',
             'StartDate',
             'CancelDate',
@@ -157,31 +163,37 @@ class OpenOrderController extends Controller
             'RoutingDate',
             'PICKUPAPPTime',
             'InHouseDate',
-            'ActualETA', 
+            'ActualETA',
+            'FPO_shipment',
+            'container',
             'Containerreceived',
-            'notes',
+            'wbct_date',
+            'BuyerCode',
+            'note1',
+            'note2',
         )
-        ->where([
-            ['SHIPPED', '!=', 'YES'],
-            ['controlNumber', '!=', 0],
-            
-        ])
-        ->orderby($request->sortBy,$request->sortDesc)
-        ->paginate($request->itemsPerPage);
-        
-        
+            ->where([
+
+                ['controlNumber', '!=', 0],
+
+            ])
+            ->orderby($request->sortBy, $request->sortDesc)
+            ->paginate($request->itemsPerPage);
+
+
         return response()->json([
             'success' => true,
             'object' => $objFetch,
         ], 200);
     }
 
-    public function sorting(Request $request){
+    public function sorting(Request $request)
+    {
 
 
-       if (isset($request->sortBy)) {
-        $objFetch = OpenOrder::select(
-                       'id', 
+        if (isset($request->sortBy)) {
+            $objFetch = OpenOrder::select(
+                'id',
                 'program',
                 'controlNumber',
                 'CustomerName',
@@ -200,40 +212,38 @@ class OpenOrderController extends Controller
                 'PICKUPAPPTime',
                 'InHouseDate',
                 'ActualETA',
-        //         // FPO AND shipment 
-        //         // Container
+                //         // FPO AND shipment 
+                //         // Container
                 'Containerreceived',
-        //         // WBCT DATE
+                //         // WBCT DATE
                 'notes',
-        //         // buyer NAME 
-        //         // OTHER NOTE 
-        //         // PROGRAM @ 
-        )
-                ->orderby($request->sortBy[0], $request->sortDesc) 
+                //         // buyer NAME 
+                //         // OTHER NOTE 
+                //         // PROGRAM @ 
+            )
+                ->orderby($request->sortBy[0], $request->sortDesc)
                 ->where('SHIPPED', '!=', 'YES')
                 ->where('controlNumber', '!=', 0)
                 ->get();
-          
-                // return ['sortby'=>$request->sortBy[0], 'asc/desc'=>$request->sortDesc[0]];
-                // down desc true
-                // up asc false
-       return response()->json([
+
+            // return ['sortby'=>$request->sortBy[0], 'asc/desc'=>$request->sortDesc[0]];
+            // down desc true
+            // up asc false
+            return response()->json([
                 'success' => true,
                 'objects' => $objFetch,
-                'sortby'=>$request->sortBy[0],
-                'asc/desc'=>$request->sortDesc[0],
-              
+                'sortby' => $request->sortBy[0],
+                'asc/desc' => $request->sortDesc[0],
+
 
             ], 200);
-        
-       } else {
+        } else {
             // return 'index';
-        return  $this->index();
-     
-       }
+            return  $this->index();
+        }
     }
 
-  
+
 
     /**
      * Store a newly created resource in storage.
@@ -522,13 +532,13 @@ class OpenOrderController extends Controller
 
             // filter companies
             if ($request->majorCompanies != '' && $request->cancelDate_start == '' && $request->startDate_start == '' && $request->newCancelDate_start == '') {
-                $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
+                $objFetch = OpenOrder::where('CustomerName', $request->majorCompanies)
                     ->orderby('id', 'desc')->get();
             }
 
             // filter start date
             if ($request->startDate_start != '') {
-                $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
+                $objFetch = OpenOrder::where('CustomerName', $request->majorCompanies)
                     ->whereBetween(
                         'StartDate',
                         array($timestamp_Start, $timestamp_End)
@@ -539,7 +549,7 @@ class OpenOrderController extends Controller
             // filter cancel date
             if ($request->cancelDate_start != '' && $request->startDate_start == '') {
 
-                $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
+                $objFetch = OpenOrder::where('CustomerName', $request->majorCompanies)
                     ->whereBetween(
                         'CancelDate',
                         array(strtotime($request->cancelDate_start), strtotime($request->cancelDate_end))
@@ -549,7 +559,7 @@ class OpenOrderController extends Controller
 
             // filter new cancel date
             if ($request->newCancelDate_start != '' && $request->cancelDate_start == '' && $request->startDate_start == '') {
-                $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
+                $objFetch = OpenOrder::where('CustomerName', $request->majorCompanies)
                     ->whereBetween(
                         'newCancelDate',
                         array(strtotime($request->newCancelDate_start), strtotime($request->newCancelDate_end))
@@ -560,7 +570,7 @@ class OpenOrderController extends Controller
 
             // filter cancel date, start date, new cancel date
             if ($request->cancelDate_start != '' && $request->startDate_start != '' && $request->newCancelDate_start != '') {
-                $objFetch = OpenOrder::where('OrderCustomer', $request->majorCompanies)
+                $objFetch = OpenOrder::where('CustomerName', $request->majorCompanies)
                     ->whereBetween(
                         'StartDate',
                         array($timestamp_Start, $timestamp_End)
@@ -596,9 +606,9 @@ class OpenOrderController extends Controller
     public function majorCompany(OpenOrder $openOrder)
     {
         $objectFind = OpenOrder::orderby('id', 'desc')
-            ->select('OrderCustomer')
-            ->where('OrderCustomer', '!=', 'excel2json')
-            ->distinct('OrderCustomer')
+            ->select('CustomerName')
+            ->where('CustomerName', '!=', 'excel2json')
+            ->distinct('CustomerName')
             ->get();
 
         return response()->json([
@@ -626,7 +636,8 @@ class OpenOrderController extends Controller
             'Routed',
             'SHIPPED',
             'Containerreceived',
-            'notes',
+            'note1',
+            'note2',
 
             // 'CompanyCode',
             // 'DivisionCode',
@@ -651,7 +662,7 @@ class OpenOrderController extends Controller
      * are matched we update the style value of the shipment data
      * into open order column on open order table
      */
-    public function styleCheckUpdate($id,Request $request)
+    public function styleCheckUpdate($id, Request $request)
     {
         $requestObject = $request->objectRequest;
         foreach ($requestObject  as $key => $value) {
@@ -664,6 +675,114 @@ class OpenOrderController extends Controller
             'success' => true,
             'message' => 'Shipment styles updated',
             'objects' => $requestObject
+        ], 200);
+    }
+
+    public function processRequiredChanges(Request $request)
+    {
+
+
+        $openorder_data = OpenorderImportTemp::select(
+            'id',
+            'controlNumber',
+            'ItemNumber',
+            'OpenOrderQty',
+            'StartDate',
+            'CancelDate',
+            'InHouseDate',
+            'OrderCustomer',
+            'CustomerPurchaseOrder',
+            'InHouseDate',
+            'BuyerCode',
+
+        )
+            ->with('shipment:id,Item,ColorCode,qty,Po,Cont,Ref')
+            ->orderby('id', 'desc')
+            ->where('ControlNumber', '!=', '0')
+
+            ->get();
+        $collection = collect();
+
+        $openorder_data->each(
+            function ($item) use ($collection) {
+                $target = $collection->where('controlNumber', $item->controlNumber);
+                if ($item->shipment != null) {
+                    $item->shipment->qty = str_replace('$', '', $item->shipment->qty);
+                    $item->shipment->qty = str_replace(',', '', $item->shipment->qty);
+                    $item->shipment->qty = json_decode($item->shipment->qty);
+                    $item->controlNumber = json_decode($item->controlNumber);
+                    $collection->push($item);
+                }
+            }
+        );
+
+        foreach ($collection as $key => $value) {
+            $object_find = OpenOrder::firstWhere('controlNumber', $value['controlNumber']);
+            if (isset($object_find['controlNumber'])) {
+                // echo "CN exist " . $object_find['controlNumber'];
+                if ($object_find['controlNumber'] == $value['controlNumber']) {
+                    // echo " QTY UPDATE " . $object_find['controlNumber'] . ' -- ' . $value->shipment['qty'];
+
+                    $updateQTY = OpenOrder::where('controlNumber', $value['controlNumber'])->update([
+                        'TotalQuantityOrdered' => $object_find->TotalQuantityOrdered + $value->shipment['qty'],
+                        'OpenOrderQty' => $object_find->OpenOrderQty + $value['OpenOrderQty']
+                    ]);;
+                } else {
+                    $storeObj = OpenOrder::create([
+                        'controlNumber' => $value['controlNumber'],
+                        'style' => $value['ItemNumber'],
+                        'TotalQuantityOrdered' => $value->shipment['qty'],
+                        'CustomerPurchaseOrder' => $value['CustomerPurchaseOrderqty'],
+                        'masterpo' => $value->shipment['Po'],
+                        'OpenOrderQty' => $value['OpenOrderQty'],
+                        'StartDate' => strtotime($value['StartDate']),
+                        'CancelDate' => strtotime($value['CancelDate']),
+                        'InHouseDate' => $value['InHouseDate'],
+                        'CustomerName' => $value['OrderCustomer'],
+                        'FPO_shipment' => $value->shipment['Ref'],
+                        'container' => $value->shipment['Cont'],
+                        'BuyerCode' => $value['BuyerCode'],
+                    ]);
+                }
+            } else {
+                // echo "no";
+                $storeObj = OpenOrder::create([
+                    'controlNumber' => $value['controlNumber'],
+                    'style' => $value['ItemNumber'],
+                    'TotalQuantityOrdered' => $value->shipment['qty'],
+                    'CustomerPurchaseOrder' => $value['CustomerPurchaseOrderqty'],
+                    'masterpo' => $value->shipment['Po'],
+                    'OpenOrderQty' => $value['OpenOrderQty'],
+                    'StartDate' => strtotime($value['StartDate']),
+                    'CancelDate' => strtotime($value['CancelDate']),
+                    'InHouseDate' => $value['InHouseDate'],
+                    'CustomerName' => $value['OrderCustomer'],
+                    'FPO_shipment' => $value->shipment['Ref'],
+                    'container' => $value->shipment['Cont'],
+                    'BuyerCode' => $value['BuyerCode'],
+                ]);
+            }
+        }
+
+
+        $removeDuplicates = $collection->unique(function ($item) {
+            return $item['controlNumber'];
+        });
+
+        OpenorderImportTemp::truncate();
+        ShipmentImportTemp::truncate();
+
+        return response()->json([
+
+            'success' => true,
+            'collectionSum' =>  $collection->sum('shipment.qty'),
+            'message' => 'Process Started',
+            'collection_count' => $collection->count(),
+            'removeDuplicates_count' => $removeDuplicates->count(),
+
+            'collection' => $collection,
+
+
         ], 200);
     }
     /**
@@ -693,6 +812,7 @@ class OpenOrderController extends Controller
             'status' => 200,
             'message' => 'Recode updated successfully',
             'data' => $updateObj,
+            'request' => $request->all(),
 
         ]);
     }

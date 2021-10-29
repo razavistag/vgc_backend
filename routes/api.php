@@ -21,8 +21,10 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\OpenOrderController;
+use App\Http\Controllers\OpenorderImportTempController;
 use App\Http\Controllers\PoController;
 use App\Http\Controllers\ReceivinglogenteryController;
+use App\Http\Controllers\ShipmentImportTempController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\VendorfactoryController;
 use App\Models\OpenOrder;
@@ -158,5 +160,9 @@ Route::group(['middleware' => 'auth:api'], function () {
     Route::get('openorder/mastersearch/', [OpenOrderController::class, 'masterSearch']);
     Route::get('openorder/sorting/', [OpenOrderController::class, 'sorting']);
     Route::get('openorder/datatable/', [OpenOrderController::class, 'datatable']);
-    
+
+    Route::post('openordertemp', [OpenorderImportTempController::class, 'store']);
+    Route::post('shipmenttemp', [ShipmentImportTempController::class, 'store']);
+    Route::post('processRequiredChanges', [OpenOrderController::class, 'processRequiredChanges']);
+    // Route::get('openorder/datatable', [OpenOrderController::class, 'datatable']);
 });
